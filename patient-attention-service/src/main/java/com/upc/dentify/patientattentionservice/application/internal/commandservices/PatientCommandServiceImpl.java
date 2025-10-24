@@ -85,6 +85,10 @@ public class PatientCommandServiceImpl implements PatientCommandService {
     public void handle(UserUpdatedEvent event) {
         log.info("Recibido UserUpdatedEvent: userId={}", event.getUserId());
 
+        if(event.getRole() != 3L) {
+            throw new IllegalArgumentException("Role must be 3L: Patient");
+        }
+
         patientRepository.findByUserId(event.getUserId()).ifPresent(patient -> {
             patient.updateBasicInfo(
                     event.getFirstName(),

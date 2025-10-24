@@ -41,7 +41,8 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
         UserUpdatedEvent payload = new UserUpdatedEvent(
                 userId,
                 command.firstName(),
-                command.lastName()
+                command.lastName(),
+                user.getRole().getId()
         );
         eventPublisher.publishEvent(new UserUpdatedDomainEvent(payload));
 
