@@ -8,6 +8,8 @@ import com.upc.dentify.iam.domain.model.valueobjects.PersonName;
 import com.upc.dentify.iam.domain.services.ProfileCommandService;
 import com.upc.dentify.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import com.upc.dentify.iam.infrastructure.security.AuthenticatedUserProvider;
+import com.upc.dentify.iam.messaging.UserUpdatedDomainEvent;
+import jakarta.transaction.Transactional;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,19 +31,19 @@ public class ProfileCommandServiceImpl implements ProfileCommandService {
     }
 
 
+    @Transactional
     @Override
     public Optional<User> handle(UpdatePersonalInformationCommand command) {
         Long userId = authenticatedUserProvider.getCurrentUserId();
         User user = userRepository.findById(userId).orElseThrow(()-> new IllegalStateException("User not found"));
         user.setPersonName(new PersonName(command.firstName(), command.lastName()));
 
-        eventPublisher.publishEvent(new UserUpdatedEvent(
-                user.getId(),
-                user.getPersonName().firstName(),
-                user.getPersonName().lastName(),
-                user.getEmail().email(),
-                user.getBirthDate().birthDate()
-        ));
+        UserUpdatedEvent payload = new UserUpdatedEvent(
+                userId,
+                command.firstName(),
+                command.lastName()
+        );
+        eventPublisher.publishEvent(new UserUpdatedDomainEvent(payload));
 
         try {
             userRepository.save(user);

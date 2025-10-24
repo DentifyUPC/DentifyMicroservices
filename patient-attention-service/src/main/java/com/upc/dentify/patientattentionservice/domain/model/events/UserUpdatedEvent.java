@@ -1,4 +1,4 @@
-package com.upc.dentify.iam.domain.events;
+package com.upc.dentify.patientattentionservice.domain.model.events;
 
 import lombok.Getter;
 

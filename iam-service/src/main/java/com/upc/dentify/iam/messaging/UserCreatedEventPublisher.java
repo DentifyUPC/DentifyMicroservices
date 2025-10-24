@@ -2,6 +2,7 @@ package com.upc.dentify.iam.messaging;
 
 import com.upc.dentify.iam.config.RabbitConfig;
 import com.upc.dentify.iam.domain.events.UserCreatedEvent;
+import com.upc.dentify.iam.domain.events.UserUpdatedEvent;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,19 @@ public class UserCreatedEventPublisher {
                 message -> {
                     message.getMessageProperties().setHeader("correlationId", payload.getUserId());
                     // persistente
+                    message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+                    return message;
+                });
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onUserUpdated(UserUpdatedDomainEvent event) {
+        UserUpdatedEvent payload = event.getPayload();
+        rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE,
+                RabbitConfig.USER_UPDATED_ROUTING_KEY,
+                payload,
+                message -> {
+                    message.getMessageProperties().setHeader("correlationId", payload.getUserId());
                     message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
                     return message;
                 });

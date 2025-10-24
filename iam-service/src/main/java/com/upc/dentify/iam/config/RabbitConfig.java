@@ -26,6 +26,9 @@ public class RabbitConfig {
     public static final String USER_CREATED_ROUTING_KEY = "user.created";
     public static final String USER_CREATED_QUEUE = "user.created";
     public static final String USER_CREATED_DLQ = "user.created.dlq";
+    public static final String USER_UPDATED_ROUTING_KEY = "user.updated";
+    public static final String USER_UPDATED_QUEUE = "user.updated";
+    public static final String USER_UPDATED_DLQ = "user.updated.dlq";
 
     @Bean
     public TopicExchange userExchange() {
@@ -60,10 +63,34 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Binding bindingDlq() {
+    public Queue userUpdatedQueue() {
+        return new Queue(USER_UPDATED_QUEUE, true, false, false);
+    }
+
+    @Bean
+    public Queue userUpdatedDlq() {
+        return new Queue(USER_UPDATED_DLQ, true);
+    }
+
+    @Bean
+    public Binding bindingUserUpdated() {
+        return BindingBuilder.bind(userUpdatedQueue())
+                .to(userExchange())
+                .with(USER_UPDATED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding bindingCreatedDlq() {
         return BindingBuilder.bind(userCreatedDlq())
                 .to(deadLetterExchange())
                 .with(USER_CREATED_DLQ);
+    }
+
+    @Bean
+    public Binding bindingUpdatedDlq() {
+        return BindingBuilder.bind(userUpdatedDlq())
+                .to(deadLetterExchange())
+                .with(USER_UPDATED_DLQ);
     }
 
     @Bean

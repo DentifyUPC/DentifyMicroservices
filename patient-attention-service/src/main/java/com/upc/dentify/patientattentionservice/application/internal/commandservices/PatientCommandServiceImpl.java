@@ -4,6 +4,7 @@ import com.upc.dentify.patientattentionservice.config.RabbitConfig;
 import com.upc.dentify.patientattentionservice.domain.model.aggregates.Patient;
 import com.upc.dentify.patientattentionservice.domain.model.commands.UpdatePatientCommand;
 import com.upc.dentify.patientattentionservice.domain.model.events.UserCreatedEvent;
+import com.upc.dentify.patientattentionservice.domain.model.events.UserUpdatedEvent;
 import com.upc.dentify.patientattentionservice.domain.model.valueobjects.Address;
 import com.upc.dentify.patientattentionservice.domain.services.PatientCommandService;
 import com.upc.dentify.patientattentionservice.infrastructure.persistence.jpa.repositories.PatientRepository;
@@ -77,5 +78,19 @@ public class PatientCommandServiceImpl implements PatientCommandService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    @RabbitListener(queues = RabbitConfig.USER_UPDATED_QUEUE)
+    public void handle(UserUpdatedEvent event) {
+        log.info("Recibido UserUpdatedEvent: userId={}", event.getUserId());
+
+        patientRepository.findByUserId(event.getUserId()).ifPresent(patient -> {
+            patient.updateBasicInfo(
+                    event.getFirstName(),
+                    event.getLastName()
+            );
+            patientRepository.save(patient);
+        });
     }
 }

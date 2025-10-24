@@ -20,6 +20,8 @@ public class RabbitConfig {
     public static final String EXCHANGE = "user.events";
     public static final String USER_CREATED_ROUTING_KEY = "user.created";
     public static final String USER_CREATED_QUEUE = "user.created";
+    public static final String USER_UPDATED_ROUTING_KEY = "user.updated";
+    public static final String USER_UPDATED_QUEUE = "user.updated";
 
     @Bean
     public Queue userCreatedQueue() {
@@ -35,6 +37,18 @@ public class RabbitConfig {
         return BindingBuilder.bind(userCreatedQueue)
                 .to(new TopicExchange(EXCHANGE))
                 .with(USER_CREATED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue userUpdatedQueue() {
+        return new Queue(USER_UPDATED_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingUserUpdated(Queue userUpdatedQueue) {
+        return BindingBuilder.bind(userUpdatedQueue)
+                .to(new TopicExchange(EXCHANGE))
+                .with(USER_UPDATED_ROUTING_KEY);
     }
 
     @Bean
