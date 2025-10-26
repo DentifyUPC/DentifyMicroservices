@@ -10,12 +10,17 @@ import com.upc.dentify.iam.interfaces.rest.transform.SignUpCommandFromResourceAs
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @Tag(name = "Authentication", description = "Authentication Endpoint")
@@ -47,5 +52,14 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+
+
+    @PostMapping("/debug-echo")
+    public ResponseEntity<Map<String,Object>> debug(HttpServletRequest req, @RequestBody(required=false) Map<String,Object> body) {
+        Map<String,Object> info = new LinkedHashMap<>();
+        Collections.list(req.getHeaderNames()).forEach(h -> info.put(h, req.getHeader(h)));
+        info.put("parsedBody", body);
+        return ResponseEntity.ok(info);
+    }
 
 }
