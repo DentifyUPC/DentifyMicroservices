@@ -1,0 +1,109 @@
+[
+  {
+    "service": "Odontología General",
+    "items": [
+      { "name": "Guantes de látex", "quantity": 2 },
+      { "name": "Mascarillas quirúrgicas", "quantity": 1 },
+      { "name": "Espejos bucales", "quantity": 1 },
+      { "name": "Exploradores dentales", "quantity": 1 },
+      { "name": "Algodón", "quantity": 5 }
+    ]
+  },
+  {
+    "service": "Limpieza Dental",
+    "items": [
+      { "name": "Guantes de látex", "quantity": 2 },
+      { "name": "Mascarillas quirúrgicas", "quantity": 1 },
+      { "name": "Cepillos interdentales", "quantity": 2 },
+      { "name": "Pasta profiláctica", "quantity": 1 },
+      { "name": "Algodón", "quantity": 5 }
+    ]
+  },
+  {
+    "service": "Blanqueamiento Dental",
+    "items": [
+      { "name": "Guantes de látex", "quantity": 2 },
+      { "name": "Mascarillas quirúrgicas", "quantity": 1 },
+      { "name": "Pasta profiláctica", "quantity": 1 },
+      { "name": "Algodón", "quantity": 5 },
+      { "name": "Escupideras desechables", "quantity": 1 }
+    ]
+  },
+  {
+    "service": "Tratamiento de Caries",
+    "items": [
+      { "name": "Guantes de látex", "quantity": 2 },
+      { "name": "Mascarillas quirúrgicas", "quantity": 1 },
+      { "name": "Composite dental", "quantity": 1 },
+      { "name": "Resina fluida", "quantity": 1 },
+      { "name": "Espejos bucales", "quantity": 1 },
+      { "name": "Exploradores dentales", "quantity": 1 },
+      { "name": "Algodón", "quantity": 5 }
+    ]
+  },
+  {
+    "service": "Endodoncia",
+    "items": [
+      { "name": "Guantes de látex", "quantity": 2 },
+      { "name": "Mascarillas quirúrgicas", "quantity": 1 },
+      { "name": "Limas endodónticas", "quantity": 1 },
+      { "name": "Conos de gutapercha", "quantity": 1 },
+      { "name": "Sellador endodóntico", "quantity": 1 },
+      { "name": "Algodón", "quantity": 5 }
+    ]
+  },
+  {
+    "service": "Periodoncia",
+    "items": [
+      { "name": "Guantes de látex", "quantity": 2 },
+      { "name": "Mascarillas quirúrgicas", "quantity": 1 },
+      { "name": "Curetas periodontales", "quantity": 1 },
+      { "name": "Algodón", "quantity": 5 }
+    ]
+  },
+  {
+    "service": "Ortodoncia",
+    "items": [
+      { "name": "Guantes de látex", "quantity": 2 },
+      { "name": "Mascarillas quirúrgicas", "quantity": 1 },
+      { "name": "Arcos de ortodoncia", "quantity": 1 },
+      { "name": "Brackets metálicos", "quantity": 2 },
+      { "name": "Elásticos ortodónticos", "quantity": 1 },
+      { "name": "Ligaduras metálicas", "quantity": 1 }
+    ]
+  },
+  {
+    "service": "Odontopediatría",
+    "items": [
+      { "name": "Guantes de látex", "quantity": 2 },
+      { "name": "Mascarillas quirúrgicas", "quantity": 1 },
+      { "name": "Espejos bucales", "quantity": 1 },
+      { "name": "Exploradores dentales", "quantity": 1 },
+      { "name": "Algodón", "quantity": 5 }
+    ]
+  },
+  {
+    "service": "Cirugía Oral Menor",
+    "items": [
+      { "name": "Guantes de látex", "quantity": 2 },
+      { "name": "Mascarillas quirúrgicas", "quantity": 1 },
+      { "name": "Bisturís", "quantity": 1 },
+      { "name": "Hojas de bisturí", "quantity": 1 },
+      { "name": "Elevadores periotomos", "quantity": 1 },
+      { "name": "Fórceps de extracción", "quantity": 1 },
+      { "name": "Algodón", "quantity": 5 }
+    ]
+  },
+  {
+    "service": "Implantes Dentales",
+    "items": [
+      { "name": "Guantes de látex", "quantity": 2 },
+      { "name": "Mascarillas quirúrgicas", "quantity": 1 },
+      { "name": "Implantes Dentales", "quantity": 1 },
+      { "name": "Carpules de anestesia", "quantity": 1 },
+      { "name": "Elevadores periotomos", "quantity": 1 },
+      { "name": "Fórceps de extracción", "quantity": 1 },
+      { "name": "Algodón", "quantity": 5 }
+    ]
+  }
+]

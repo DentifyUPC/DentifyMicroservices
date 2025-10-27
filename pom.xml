@@ -15,5 +15,6 @@
         <module>iam-service</module>
         <module>patient-attention-service</module>
         <module>practice-management-service</module>
+        <module>service-catalog-service</module>
     </modules>
 </project>

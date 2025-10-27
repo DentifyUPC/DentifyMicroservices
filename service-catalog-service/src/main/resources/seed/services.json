@@ -1,0 +1,12 @@
+[
+  { "name": "Odontología General" },
+  { "name": "Limpieza Dental" },
+  { "name": "Blanqueamiento Dental" },
+  { "name": "Tratamiento de Caries" },
+  { "name": "Endodoncia" },
+  { "name": "Periodoncia" },
+  { "name": "Ortodoncia" },
+  { "name": "Odontopediatría" },
+  { "name": "Cirugía Oral Menor" },
+  { "name": "Implantes Dentales" }
+]

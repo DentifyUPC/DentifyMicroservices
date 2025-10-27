@@ -1,0 +1,23 @@
+[
+  { "name": "Unidad" },
+  { "name": "Caja" },
+  { "name": "Paquete" },
+  { "name": "Bolsa" },
+  { "name": "Botella" },
+  { "name": "Tubo" },
+  { "name": "Jeringa" },
+  { "name": "Mililitro" },
+  { "name": "Gramo" },
+  { "name": "Kilogramo" },
+  { "name": "Litro" },
+  { "name": "Centímetro cúbico" },
+  { "name": "Metro" },
+  { "name": "Rollo" },
+  { "name": "Par" },
+  { "name": "Hoja" },
+  { "name": "Cartucho" },
+  { "name": "Ampolla" },
+  { "name": "Kit" },
+  { "name": "Set" },
+  { "name":  "Cápsula"}
+]

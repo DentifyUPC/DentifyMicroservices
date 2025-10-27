@@ -1,0 +1,82 @@
+[
+  { "name": "Guantes de látex", "unitType": "Caja" },
+  { "name": "Guantes de nitrilo", "unitType": "Caja" },
+  { "name": "Mascarillas quirúrgicas", "unitType": "Caja" },
+  { "name": "Mascarillas N95", "unitType": "Unidad" },
+  { "name": "Batas desechables", "unitType": "Unidad" },
+  { "name": "Gorros quirúrgicos", "unitType": "Bolsa" },
+  { "name": "Protectores faciales", "unitType": "Unidad" },
+
+  { "name": "Algodón", "unitType": "Bolsa" },
+  { "name": "Gasas estériles", "unitType": "Paquete" },
+  { "name": "Torundas", "unitType": "Bolsa" },
+  { "name": "Compresas estériles", "unitType": "Paquete" },
+
+  { "name": "Alcohol etílico 70%", "unitType": "Botella" },
+  { "name": "Agua oxigenada", "unitType": "Botella" },
+  { "name": "Hipoclorito de sodio", "unitType": "Botella" },
+  { "name": "Glutaraldehído", "unitType": "Botella" },
+  { "name": "Clorhexidina", "unitType": "Botella" },
+  { "name": "Agua destilada", "unitType": "Litro" },
+
+  { "name": "Jeringas desechables", "unitType": "Jeringa" },
+  { "name": "Agujas dentales", "unitType": "Caja" },
+  { "name": "Carpules de anestesia", "unitType": "Caja" },
+  { "name": "Anestesia local", "unitType": "Ampolla" },
+
+  { "name": "Composite dental", "unitType": "Tubo" },
+  { "name": "Resina fluida", "unitType": "Tubo" },
+  { "name": "Sellador de fisuras", "unitType": "Tubo" },
+  { "name": "Cemento de ionómero vítreo", "unitType": "Botella" },
+  { "name": "Cemento de fosfato de zinc", "unitType": "Botella" },
+  { "name": "Eugenol", "unitType": "Botella" },
+  { "name": "Amalgama en cápsula", "unitType": "Cápsula" },
+
+  { "name": "Yeso dental", "unitType": "Kilogramo" },
+  { "name": "Alginato", "unitType": "Bolsa" },
+  { "name": "Cera para mordida", "unitType": "Hoja" },
+  { "name": "Cera rosa", "unitType": "Hoja" },
+  { "name": "Silicona para impresión", "unitType": "Cartucho" },
+
+  { "name": "Hilo dental", "unitType": "Rollo" },
+  { "name": "Cepillos interdentales", "unitType": "Paquete" },
+  { "name": "Pasta profiláctica", "unitType": "Tubo" },
+  { "name": "Discos de pulido", "unitType": "Caja" },
+  { "name": "Tiras de pulido", "unitType": "Paquete" },
+
+  { "name": "Matrices metálicas", "unitType": "Caja" },
+  { "name": "Cunetas matrices transparentes", "unitType": "Paquete" },
+  { "name": "Cuñas de madera", "unitType": "Paquete" },
+
+  { "name": "Limas endodónticas", "unitType": "Set" },
+  { "name": "Conos de gutapercha", "unitType": "Paquete" },
+  { "name": "Sellador endodóntico", "unitType": "Tubo" },
+
+  { "name": "Arcos de ortodoncia", "unitType": "Set" },
+  { "name": "Brackets metálicos", "unitType": "Caja" },
+  { "name": "Brackets estéticos", "unitType": "Caja" },
+  { "name": "Tubos molares", "unitType": "Caja" },
+  { "name": "Elásticos ortodónticos", "unitType": "Paquete" },
+  { "name": "Cadenas elásticas", "unitType": "Rollo" },
+  { "name": "Ligaduras metálicas", "unitType": "Paquete" },
+
+  { "name": "Radiografías intraorales", "unitType": "Hoja" },
+  { "name": "Placas radiográficas", "unitType": "Caja" },
+  { "name": "Protectores plomados", "unitType": "Unidad" },
+
+  { "name": "Escupideras desechables", "unitType": "Paquete" },
+  { "name": "Cubetas para impresión", "unitType": "Set" },
+  { "name": "Espejos bucales", "unitType": "Unidad" },
+  { "name": "Exploradores dentales", "unitType": "Unidad" },
+  { "name": "Pinzas algodoneras", "unitType": "Unidad" },
+  { "name": "Curetas periodontales", "unitType": "Unidad" },
+  { "name": "Elevadores periotomos", "unitType": "Unidad" },
+  { "name": "Fórceps de extracción", "unitType": "Unidad" },
+  { "name": "Bisturís", "unitType": "Unidad" },
+  { "name": "Hojas de bisturí", "unitType": "Caja" },
+
+  { "name": "Irrigadores", "unitType": "Unidad" },
+  { "name": "Aspiradores quirúrgicos desechables", "unitType": "Paquete" },
+  { "name": "Eyectores de saliva", "unitType": "Paquete" },
+  { "name": "Implantes Dentales", "unitType":  "Caja"}
+]
