@@ -16,5 +16,6 @@
         <module>patient-attention-service</module>
         <module>practice-management-service</module>
         <module>service-catalog-service</module>
+        <module>clinic-management-service</module>
     </modules>
 </project>

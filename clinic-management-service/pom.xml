@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.upc.dentify</groupId>
-    <artifactId>service-catalog-service</artifactId>
+    <artifactId>clinic-management-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>service-catalog-service</name>
-    <description>service-catalog-service</description>
+    <name>clinic-management-service</name>
+    <description>clinic-management-service</description>
     <url/>
     <licenses>
         <license/>
@@ -82,11 +82,11 @@
         <!--            <scope>test</scope>-->
         <!--        </dependency>-->
         <!--        rabbitmq-->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-amqp</artifactId>-->
-<!--            <version>3.5.6</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-amqp</artifactId>-->
+        <!--            <version>3.5.6</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
