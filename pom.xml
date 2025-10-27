@@ -14,5 +14,6 @@
         <module>api-gateway</module>
         <module>iam-service</module>
         <module>patient-attention-service</module>
+        <module>practice-management-service</module>
     </modules>
 </project>

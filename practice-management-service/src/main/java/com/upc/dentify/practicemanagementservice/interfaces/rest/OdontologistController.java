@@ -12,6 +12,7 @@ import com.upc.dentify.practicemanagementservice.interfaces.rest.transform.Odont
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class OdontologistController {
         this.odontologistCommandService = odontologistCommandService;
     }
 
-    //@PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{odontologistId}")
     public ResponseEntity<OdontologistResource> updatePatient(@PathVariable("odontologistId") Long odontologistId, @RequestBody UpdateOdontologistRequestResource requestResource) {
         var command = OdontologistCommandFromResourceAssembler.toCommand(odontologistId, requestResource);
@@ -39,7 +40,7 @@ public class OdontologistController {
         )).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    //@PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/clinics/{clinicId}/odontologists")
     public List<OdontologistResource> getAllOdontologistByClinicId(@PathVariable("clinicId") Long clinicId) {
         var odontologist = odontologistQueryService.handle(new GetAllOdontologistByClinicId(clinicId));
@@ -48,8 +49,8 @@ public class OdontologistController {
                 .toList();
     }
 
-    //@PreAuthorize("hasAnyAuthority('ADMIN', 'ODONTOLOGIST')")
-    @GetMapping("user/{userId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'ODONTOLOGIST')")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<OdontologistResource> getOdontologistByUserId(@PathVariable("userId") Long userId) {
         var query = new GetOdontologistByUserId(userId);
         return odontologistQueryService.handle(query)
