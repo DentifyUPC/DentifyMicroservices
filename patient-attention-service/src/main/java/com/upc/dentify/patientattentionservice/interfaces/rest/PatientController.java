@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class PatientController {
         this.patientQueryService = patientQueryService;
     }
 
-//    @PreAuthorize("hasAuthority('PATIENT')")
+    @PreAuthorize("hasAuthority('PATIENT')")
     @PutMapping("/{patientId}")
     public ResponseEntity<PatientResource> updatePatient(@PathVariable("patientId") Long patientId, @RequestBody UpdatePatientRequestResource requestResource) {
         var command = PatientCommandFromResourceAssembler.toCommand(patientId, requestResource);
@@ -40,7 +41,7 @@ public class PatientController {
         )).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-//    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/clinics/{clinicId}/patients")
     public List<PatientResource> getAllPatientsByClinicId(@PathVariable("clinicId") Long clinicId) {
         var patients = patientQueryService.handle(new GetAllPatientsByClinicId(clinicId));
@@ -49,8 +50,8 @@ public class PatientController {
                 .toList();
     }
 
-//    @PreAuthorize("hasAnyAuthority('ODONTOLOGIST', 'PATIENT')")
-    @GetMapping("user/{userId}")
+    @PreAuthorize("hasAnyAuthority('ODONTOLOGIST', 'PATIENT')")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<PatientResource> getPatientByUserId(@PathVariable("userId") Long userId) {
         var query = new GetPatientByUserId(userId);
         return patientQueryService.handle(query)
