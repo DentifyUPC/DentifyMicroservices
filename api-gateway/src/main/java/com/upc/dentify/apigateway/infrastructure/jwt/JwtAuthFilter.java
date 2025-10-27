@@ -5,7 +5,6 @@ import io.jsonwebtoken.Claims;
 import jakarta.ws.rs.core.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.http.HttpStatus;
@@ -19,7 +18,6 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @Component
-//@ConditionalOnProperty(prefix = "gateway.security", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class JwtAuthFilter implements GlobalFilter, Ordered{
 
     private static final Logger log = LoggerFactory.getLogger(JwtAuthFilter.class);
@@ -28,14 +26,10 @@ public class JwtAuthFilter implements GlobalFilter, Ordered{
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     // rutas públicas que NO requieren token
-
     private final List<String> publicPaths = List.of(
-            "/api/v1/auth/**",   // login, register, etc. del IAM (ya sin prefijo)
             "/iam-service/api/v1/auth/**",
             "/eureka/**",        // comunicación con eureka
-            "/actuator/**",      // health checks
-            "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/actuator/**"      // health checks
     );
 
 
@@ -76,8 +70,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered{
         // token válido -> extraer claims y añadir cabeceras al request para downstream
         Claims claims = jwtService.extractAllClaims(token);
         String username = claims.getSubject();
-        Object userId = claims.get("userId");     // depende del claim que uses
-        Object roles = claims.get("role");       // o "role"
+        Object userId = claims.get("userId");
+        Object roles = claims.get("role");
 
         ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                 .header("X-Username", (username != null) ? username : "")

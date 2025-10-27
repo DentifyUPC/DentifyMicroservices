@@ -41,7 +41,7 @@ public class JwtServiceImpl implements JwtService {
     @SuppressWarnings("unchecked")
     public List<String> extractRoles(String token) {
         Claims c = extractAllClaims(token);
-        Object roles = c.get("role"); // depende de cómo lo pusiste en el JWT (roles / role)
+        Object roles = c.get("role");
         if (roles instanceof List) return (List<String>) roles;
         return List.of(String.valueOf(roles));
     }

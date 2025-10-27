@@ -50,8 +50,8 @@ public class PatientController {
                 .toList();
     }
 
-//    @PreAuthorize("hasAnyAuthority('ODONTOLOGIST', 'PATIENT')")
-    @GetMapping("user/{userId}")
+    @PreAuthorize("hasAnyAuthority('ODONTOLOGIST', 'PATIENT')")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<PatientResource> getPatientByUserId(@PathVariable("userId") Long userId) {
         var query = new GetPatientByUserId(userId);
         return patientQueryService.handle(query)
