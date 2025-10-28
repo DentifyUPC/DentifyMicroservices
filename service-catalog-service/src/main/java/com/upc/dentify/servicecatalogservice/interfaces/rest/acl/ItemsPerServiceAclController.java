@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/acl/items-per-service")
+@RequestMapping("/api/v1/acl-service-catalog/items-per-service")
 public class ItemsPerServiceAclController {
 
     private final ItemPerServiceContextFacade itemPerServiceContextFacade;

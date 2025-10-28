@@ -2,14 +2,19 @@ package com.upc.dentify.clinicmanagementservice.application.internal.outboundser
 
 import com.upc.dentify.clinicmanagementservice.interfaces.rest.dtos.ItemRequiredResource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Arrays;
+import org.springframework.http.HttpHeaders;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ExternalItemPerServiceService {
+    @Value("${internal.service.token}")
+    private String internalServiceToken;
     private final RestTemplate restTemplate;
     private final String serviceCatalogBaseUrl;
 
@@ -20,8 +25,16 @@ public class ExternalItemPerServiceService {
     }
 
     public List<ItemRequiredResource> getItemsIdsByServiceId(Long serviceId) {
-        String url = serviceCatalogBaseUrl + "/api/v1/acl/items-per-service/" + serviceId;
-        ItemRequiredResource[] response = restTemplate.getForObject(url, ItemRequiredResource[].class);
-        return response != null ? Arrays.asList(response) : List.of();
+        String url = serviceCatalogBaseUrl + "/api/v1/acl-service-catalog/items-per-service/" + serviceId;
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Internal-Token", internalServiceToken);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        ResponseEntity<ItemRequiredResource[]> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                ItemRequiredResource[].class
+        );
+        return List.of(Objects.requireNonNull(response.getBody()));
     }
 }

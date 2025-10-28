@@ -13,9 +13,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final GatewayHeaderAuthFilter gatewayHeaderAuthFilter;
+    private final InternalServiceAuthFilter internalServiceAuthFilter;
 
-    public SecurityConfig(GatewayHeaderAuthFilter gatewayHeaderAuthFilter) {
+    public SecurityConfig(GatewayHeaderAuthFilter gatewayHeaderAuthFilter,
+                          InternalServiceAuthFilter internalServiceAuthFilter) {
         this.gatewayHeaderAuthFilter = gatewayHeaderAuthFilter;
+        this.internalServiceAuthFilter = internalServiceAuthFilter;
     }
 
     @Bean
@@ -31,12 +34,14 @@ public class SecurityConfig {
                     return corsConfig;
                 }))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/items/**", "/api/v1/items-per-services/**", "/api/v1/services/**", "/api/v1/acl/**", "/actuator/**").permitAll()
+                        .requestMatchers("/api/v1/acl-service-catalog/**").permitAll()
+                        .requestMatchers("/api/v1/items/**", "/api/v1/items-per-services/**", "/api/v1/services/**", "/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
+        http.addFilterBefore(internalServiceAuthFilter, UsernamePasswordAuthenticationFilter.class);
         // Register our filter early in the chain
-        http.addFilterBefore(gatewayHeaderAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(gatewayHeaderAuthFilter, InternalServiceAuthFilter.class);
 
         // No sessions
         http.sessionManagement(session -> session.sessionCreationPolicy(

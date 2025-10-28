@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/acl/items")
+@RequestMapping("/api/v1/acl-service-catalog/items")
 public class ItemsAclController {
 
     private final ItemsContextFacade itemsContextFacade;
