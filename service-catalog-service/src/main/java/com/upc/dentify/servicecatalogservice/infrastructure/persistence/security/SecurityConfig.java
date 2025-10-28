@@ -25,14 +25,6 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-                    corsConfig.setAllowedOriginPatterns(java.util.List.of("*")); // Usa esto en lugar de setAllowedOrigins
-                    corsConfig.setAllowedMethods(java.util.List.of("GET","POST","PUT","DELETE","OPTIONS"));
-                    corsConfig.setAllowedHeaders(java.util.List.of("*"));
-                    corsConfig.setAllowCredentials(true);
-                    return corsConfig;
-                }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/acl-service-catalog/**").permitAll()
                         .requestMatchers("/api/v1/items/**", "/api/v1/items-per-services/**", "/api/v1/services/**", "/actuator/**").permitAll()
