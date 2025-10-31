@@ -1,6 +1,26 @@
 version: "3.9"
 
 services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: always
+    ports:
+      - "80:80"     # HTTP required for HTTP-01 challenge
+      - "443:443"   # HTTPS
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-acme:/letsencrypt
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.le.acme.tlschallenge=false"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.le.acme.email=tu-email@ejemplo.com"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -76,6 +96,12 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - EUREKA_URL=http://service-discovery:8761/eureka/
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway.rule=Host(`dentify-microservices.eastus2.cloudapp.azure.com`)"
+      - "traefik.http.routers.gateway.entrypoints=websecure"
+      - "traefik.http.routers.gateway.tls=true"
+      - "traefik.http.routers.gateway.tls.certresolver=le"
     depends_on:
       - service-discovery
     restart: unless-stopped
@@ -167,3 +193,4 @@ volumes:
   mysql_patient_data:
   mysql_practice_data:
   mysql_catalog_data:
+  traefik-acme:
