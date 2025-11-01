@@ -1,6 +1,5 @@
 package com.upc.dentify.clinicmanagementservice.infrastructure.persistence.security;
 
-import com.upc.dentify.clinicmanagementservice.infrastructure.persistence.security.GatewayHeaderAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -26,7 +25,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/acl-service-catalog/**", "/api/v1/test/acl/**").permitAll()
+                        .requestMatchers("/api/v1/acl/**").permitAll()
                         .requestMatchers("/api/v1/clinics/**", "/api/v1/items-per-clinics/**", "/api/v1/services-per-clinics/**", "/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 );
@@ -34,7 +33,7 @@ public class SecurityConfig {
         http.addFilterBefore(internalServiceAuthFilter, UsernamePasswordAuthenticationFilter.class);
         // Register our filter early in the chain
         http.addFilterAfter(gatewayHeaderAuthFilter, InternalServiceAuthFilter.class);
-
+        
         // No sessions
         http.sessionManagement(session -> session.sessionCreationPolicy(
                 org.springframework.security.config.http.SessionCreationPolicy.STATELESS));

@@ -28,6 +28,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered{
     // rutas públicas que NO requieren token
     private final List<String> publicPaths = List.of(
             "/iam-service/api/v1/auth/**",
+            "/clinic-management-service/api/v1/clinics/clinics-information-pre-register",
             "/eureka/**",        // comunicación con eureka
             "/actuator/**"      // health checks
     );

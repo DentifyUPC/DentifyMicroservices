@@ -1,6 +1,5 @@
 package com.upc.dentify.servicecatalogservice.infrastructure.persistence.security;
 
-import com.upc.dentify.servicecatalogservice.infrastructure.persistence.security.GatewayHeaderAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -26,7 +25,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/acl-service-catalog/**").permitAll()
+                        .requestMatchers("/api/v1/acl/**").permitAll()
                         .requestMatchers("/api/v1/items/**", "/api/v1/items-per-services/**", "/api/v1/services/**", "/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 );

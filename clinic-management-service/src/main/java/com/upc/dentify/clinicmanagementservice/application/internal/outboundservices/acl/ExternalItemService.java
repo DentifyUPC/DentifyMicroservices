@@ -13,7 +13,6 @@ public class ExternalItemService {
 
     private final RestTemplate restTemplate;
     private final String serviceCatalogBaseUrl;
-
     @Value("${internal.service.token}")
     private String internalServiceToken;
 
@@ -24,14 +23,14 @@ public class ExternalItemService {
     }
 
     public Boolean existsById(Long id) {
-        String url = serviceCatalogBaseUrl + "/api/v1/acl-service-catalog/items" + id + "/exists";
+        String url = serviceCatalogBaseUrl + "/api/v1/acl/items/" + id + "/exists";
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Internal-Token", internalServiceToken);
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
         ResponseEntity<Boolean> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
-                requestEntity,
+                request,
                 Boolean.class
         );
         return response.getBody() != null && response.getBody();

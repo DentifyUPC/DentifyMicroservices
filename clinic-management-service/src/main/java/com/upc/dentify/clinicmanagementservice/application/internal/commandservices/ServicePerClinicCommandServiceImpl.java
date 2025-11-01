@@ -36,7 +36,7 @@ public class ServicePerClinicCommandServiceImpl implements ServicePerClinicComma
             var clinicItem = clinicItems.stream()
                     .filter(ipc -> ipc.getItemId().equals(requiredItem.id()))
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Item not found"));
+                    .orElseThrow(() -> new IllegalArgumentException("Item not found"));
 
             if (clinicItem.getAvailableStock() < requiredItem.quantityRequired()) {
                 throw new IllegalArgumentException(

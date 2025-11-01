@@ -50,14 +50,13 @@ public class GatewaySecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfig = new org.springframework.web.cors.CorsConfiguration();
                     corsConfig.setAllowedOriginPatterns(java.util.List.of("*"));
-                    corsConfig.setAllowedOrigins(List.of("https://clinicnetwork-40d7f.web.app"));
                     corsConfig.setAllowedMethods(java.util.List.of("GET","POST","PUT","DELETE","OPTIONS"));
                     corsConfig.setAllowedHeaders(java.util.List.of("*"));
                     corsConfig.setAllowCredentials(true);
                     return corsConfig;
                 }))
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/iam-service/api/v1/auth/**", "/actuator/**", "/eureka/**").permitAll()
+                        .pathMatchers("/iam-service/api/v1/auth/**", "/actuator/**", "/eureka/**", "/clinic-management-service/api/v1/clinics/clinics-information-pre-register").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

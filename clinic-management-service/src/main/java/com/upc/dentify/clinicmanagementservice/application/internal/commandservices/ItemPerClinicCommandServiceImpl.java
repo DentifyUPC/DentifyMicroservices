@@ -30,9 +30,6 @@ public class ItemPerClinicCommandServiceImpl implements ItemPerClinicCommandServ
             throw new IllegalArgumentException("This item does not exist in the catalog");
         }
 
-        //obtener la clinica a la que pertenece el usuario
-//        Long clinicId = externalProfileService.fetchClinicIdByUserId(userId);
-
         if(itemPerClinicRepository.existsByClinicIdAndItemId(command.clinicId(), command.itemId())) {
             throw new IllegalArgumentException("This item already exists in the clinic");
         }

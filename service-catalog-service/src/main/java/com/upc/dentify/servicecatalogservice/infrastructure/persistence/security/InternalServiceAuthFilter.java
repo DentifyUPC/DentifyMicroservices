@@ -18,7 +18,7 @@ public class InternalServiceAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().contains("/api/v1/acl-service-catalog/");
+        return !request.getRequestURI().contains("/api/v1/acl/");
     }
 
     @Override

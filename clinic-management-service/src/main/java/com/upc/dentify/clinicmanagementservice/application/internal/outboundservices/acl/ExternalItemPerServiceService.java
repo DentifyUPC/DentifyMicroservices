@@ -13,10 +13,10 @@ import java.util.Objects;
 
 @Service
 public class ExternalItemPerServiceService {
-    @Value("${internal.service.token}")
-    private String internalServiceToken;
     private final RestTemplate restTemplate;
     private final String serviceCatalogBaseUrl;
+    @Value("${internal.service.token}")
+    private String internalServiceToken;
 
     public ExternalItemPerServiceService(RestTemplate restTemplate,
                                          @Value("${external.servicecatalog.url}") String serviceCatalogBaseUrl) {
@@ -25,7 +25,7 @@ public class ExternalItemPerServiceService {
     }
 
     public List<ItemRequiredResource> getItemsIdsByServiceId(Long serviceId) {
-        String url = serviceCatalogBaseUrl + "/api/v1/acl-service-catalog/items-per-service/" + serviceId;
+        String url = serviceCatalogBaseUrl + "/api/v1/acl/items-per-service/" + serviceId;
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Internal-Token", internalServiceToken);
         HttpEntity<Void> request = new HttpEntity<>(headers);
