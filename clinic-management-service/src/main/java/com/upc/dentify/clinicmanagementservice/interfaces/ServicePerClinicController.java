@@ -1,7 +1,9 @@
 package com.upc.dentify.clinicmanagementservice.interfaces;
 
 import com.upc.dentify.clinicmanagementservice.domain.model.commands.UpdateServicePerClinicCommand;
+import com.upc.dentify.clinicmanagementservice.domain.model.queries.GetAllServicesPerClinicsQuery;
 import com.upc.dentify.clinicmanagementservice.domain.services.ServicePerClinicCommandService;
+import com.upc.dentify.clinicmanagementservice.domain.services.ServicePerClinicQueryService;
 import com.upc.dentify.clinicmanagementservice.interfaces.rest.assemblers.*;
 import com.upc.dentify.clinicmanagementservice.interfaces.rest.dtos.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -21,9 +24,12 @@ import java.util.Map;
 @Tag(name = "Services per clinics", description = "Services per Clinics Endpoint")
 public class ServicePerClinicController {
     private final ServicePerClinicCommandService servicePerClinicCommandService;
+    private final ServicePerClinicQueryService servicePerClinicQueryService;
 
-    public ServicePerClinicController(ServicePerClinicCommandService servicePerClinicCommandService) {
+    public ServicePerClinicController(ServicePerClinicCommandService servicePerClinicCommandService,
+                                      ServicePerClinicQueryService servicePerClinicQueryService) {
         this.servicePerClinicCommandService = servicePerClinicCommandService;
+        this.servicePerClinicQueryService = servicePerClinicQueryService;
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -74,5 +80,20 @@ public class ServicePerClinicController {
         var serviceResource = ServicePerClinicResourceFromEntityAssembler.toResourceFromEntity(service.get());
 
         return ResponseEntity.ok(serviceResource);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/{clinicId}")
+    @Operation(summary = "Get all services by clinic ID", description = "Get all services by clinic ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Services found"),
+            @ApiResponse(responseCode = "404", description = "Services not found")
+    })
+    public ResponseEntity<List<ServiceResource>> getAllServicePerClinics(@PathVariable Long clinicId) {
+        var services = servicePerClinicQueryService.handle(new GetAllServicesPerClinicsQuery(clinicId));
+        if(services.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(services);
     }
 }
