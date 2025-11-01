@@ -6,6 +6,7 @@ import com.upc.dentify.clinicmanagementservice.domain.model.queries.GetAllServic
 import com.upc.dentify.clinicmanagementservice.domain.services.ServicePerClinicQueryService;
 import com.upc.dentify.clinicmanagementservice.infrastructure.persistence.jpa.repositories.ClinicRepository;
 import com.upc.dentify.clinicmanagementservice.infrastructure.persistence.jpa.repositories.ServicePerClinicRepository;
+import com.upc.dentify.clinicmanagementservice.interfaces.rest.dtos.ServiceFormatResource;
 import com.upc.dentify.clinicmanagementservice.interfaces.rest.dtos.ServiceResource;
 import jakarta.ws.rs.core.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,20 +33,25 @@ public class ServicePerClinicQueryServiceImpl implements ServicePerClinicQuerySe
     }
 
     @Override
-    public List<ServiceResource> handle(GetAllServicesPerClinicsQuery query) {
+    public List<ServiceFormatResource> handle(GetAllServicesPerClinicsQuery query) {
         if(!clinicRepository.existsById(query.clinicId())) {
             throw new IllegalArgumentException("Clinic with id " + query.clinicId() + " doesn't exists");
         }
 
-        List<Long> serviceIds = servicePerClinicRepository.findByClinicId(query.clinicId())
-                .stream()
-                .map(ServicesPerClinics::getServiceId)
-                .toList();
+        List<ServicesPerClinics> servicesPerClinics = servicePerClinicRepository.findByClinicId(query.clinicId());
 
         List<ServiceResource> services = externalServicesService.getAllServices();
 
-        return services.stream()
-                .filter(service -> serviceIds.contains(service.id()))
-                .toList();
+        return servicesPerClinics.stream()
+                .flatMap(localService -> services.stream()
+                        .filter(external -> external.id().equals(localService.getServiceId()))
+                        .map(external -> new ServiceFormatResource(
+                                external.id(),
+                                external.name(),
+                                localService.getTotalPricePerItems(),
+                                localService.getTotalLaborPrice(),
+                                localService.getTotalServicePrice()
+                        ))
+                ).toList();
     }
 }

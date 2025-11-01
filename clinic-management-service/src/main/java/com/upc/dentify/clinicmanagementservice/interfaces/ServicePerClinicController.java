@@ -89,7 +89,7 @@ public class ServicePerClinicController {
             @ApiResponse(responseCode = "200", description = "Services found"),
             @ApiResponse(responseCode = "404", description = "Services not found")
     })
-    public ResponseEntity<List<ServiceResource>> getAllServicePerClinics(@PathVariable Long clinicId) {
+    public ResponseEntity<List<ServiceFormatResource>> getAllServicePerClinics(@PathVariable Long clinicId) {
         var services = servicePerClinicQueryService.handle(new GetAllServicesPerClinicsQuery(clinicId));
         if(services.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
