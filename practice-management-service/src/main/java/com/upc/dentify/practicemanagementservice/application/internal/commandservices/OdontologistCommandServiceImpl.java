@@ -1,5 +1,6 @@
 package com.upc.dentify.practicemanagementservice.application.internal.commandservices;
 
+import com.upc.dentify.practicemanagementservice.application.internal.outboundservices.ExternalServicePerClinicService;
 import com.upc.dentify.practicemanagementservice.config.RabbitConfig;
 import com.upc.dentify.practicemanagementservice.domain.model.aggregates.Odontologist;
 import com.upc.dentify.practicemanagementservice.domain.model.commands.UpdateOdontologistCommand;
@@ -19,13 +20,13 @@ import java.util.Optional;
 public class OdontologistCommandServiceImpl implements OdontologistCommandService {
     private final OdontologistRepository odontologistRepository;
     private final Logger log = LoggerFactory.getLogger(OdontologistCommandServiceImpl.class);
-    //private final ExternalServicePerClinicService externalServicePerClinicService;
+    private final ExternalServicePerClinicService externalServicePerClinicService;
 
-    public OdontologistCommandServiceImpl(OdontologistRepository odontologistRepository
-                                          //ExternalServicePerClinicService externalServicePerClinicService
+    public OdontologistCommandServiceImpl(OdontologistRepository odontologistRepository,
+                                          ExternalServicePerClinicService externalServicePerClinicService
     ) {
         this.odontologistRepository = odontologistRepository;
-        //this.externalServicePerClinicService = externalServicePerClinicService;
+        this.externalServicePerClinicService = externalServicePerClinicService;
     }
 
 
@@ -33,18 +34,17 @@ public class OdontologistCommandServiceImpl implements OdontologistCommandServic
     public Optional<Odontologist> handle(UpdateOdontologistCommand command) {
         return odontologistRepository.findById(command.odontologistId())
                 .map(odontologist -> {
-//                    if (command.serviceId() != null) {
-//                        Long clinicId = odontologist.getClinicId();
-//                        boolean exists = externalServicePerClinicService
-//                                .existsByClinicIdAndServiceId(clinicId, command.serviceId());
-//
-//                        if (!exists) {
-//                            throw new IllegalArgumentException(
-//                                    "Service id " + command.serviceId() +
-//                                            " is not available in Clinic " + clinicId
-//                            );
-//                        }
-//                    }
+                    if (command.serviceId() != null) {
+                        Long clinicId = odontologist.getClinicId();
+                        boolean exists = externalServicePerClinicService
+                                .existsByClinicIdAndServiceId(clinicId, command.serviceId());
+                        if (!exists) {
+                            throw new IllegalArgumentException(
+                                    "Service id " + command.serviceId() +
+                                            " is not available in Clinic " + clinicId
+                            );
+                        }
+                    }
 
                     Address address = null;
                     if (command.street() != null &&

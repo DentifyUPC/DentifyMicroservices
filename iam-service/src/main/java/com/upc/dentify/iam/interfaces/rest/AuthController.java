@@ -45,6 +45,10 @@ public class AuthController {
 
 
     @PostMapping("/register")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "user created"),
+            @ApiResponse(responseCode = "400", description = "user not created")
+    })
     public ResponseEntity<RegisterResponseResource> register(@RequestBody RegisterRequestResource registerRequestResource) {
         var signUpCommand = SignUpCommandFromResourceAssembler.toCommandFromResource(registerRequestResource);
         var response = authService.register(signUpCommand);

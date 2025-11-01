@@ -1,5 +1,6 @@
 package com.upc.dentify.iam.application.internal.commandservices;
 
+import com.upc.dentify.iam.application.internal.outboundservices.acl.ExternalClinicService;
 import com.upc.dentify.iam.domain.events.UserCreatedEvent;
 import com.upc.dentify.iam.domain.model.aggregates.User;
 import com.upc.dentify.iam.domain.model.commands.SignInCommand;
@@ -28,17 +29,20 @@ public class AuthCommandServiceImpl implements AuthCommandService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final IdentificationTypeRepository identificationTypeRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ExternalClinicService externalClinicService;
 
     public AuthCommandServiceImpl(JwtService jwtService,
                                   UserRepository userRepository,
                                   BCryptPasswordEncoder passwordEncoder,
-                                    IdentificationTypeRepository identificationTypeRepository,
-                                  ApplicationEventPublisher eventPublisher) {
+                                  IdentificationTypeRepository identificationTypeRepository,
+                                  ApplicationEventPublisher eventPublisher,
+                                  ExternalClinicService externalClinicService) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.identificationTypeRepository = identificationTypeRepository;
         this.eventPublisher = eventPublisher;
+        this.externalClinicService = externalClinicService;
     }
 
     public AuthResponseResource login(SignInCommand command) {
@@ -71,6 +75,10 @@ public class AuthCommandServiceImpl implements AuthCommandService {
 
         IdentificationType type = identificationTypeRepository.findById(command.identificationTypeId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Identification Type"));
+
+        if (!externalClinicService.existsByClinicId(command.clinicId())) {
+            throw new IllegalArgumentException("Clinic not found");
+        }
 
         var user = new User(command, hashedPassword, type);
         try {

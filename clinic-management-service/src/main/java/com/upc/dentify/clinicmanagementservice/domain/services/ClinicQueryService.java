@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ClinicQueryService {
     List<ClinicInformationPreRegister> handle(GetAllClinicsInformationPreRegisterQuery query);
+    boolean existsByClinicId(Long clinicId);
 }

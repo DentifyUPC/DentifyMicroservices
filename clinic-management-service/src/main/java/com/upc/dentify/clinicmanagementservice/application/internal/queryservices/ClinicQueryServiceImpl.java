@@ -21,4 +21,9 @@ public class ClinicQueryServiceImpl implements ClinicQueryService {
     public List<ClinicInformationPreRegister> handle(GetAllClinicsInformationPreRegisterQuery query) {
         return clinicRepository.findAllClinicInformationPreRegister();
     }
+
+    @Override
+    public boolean existsByClinicId(Long clinicId) {
+        return clinicRepository.existsById(clinicId);
+    }
 }
