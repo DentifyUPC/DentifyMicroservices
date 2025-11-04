@@ -1,6 +1,26 @@
 version: "3.9"
 
 services:
+
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: always
+    ports:
+      - "80:80"     # HTTP required for HTTP-01 challenge
+      - "443:443"   # HTTPS
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-acme:/letsencrypt
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.le.acme.tlschallenge=false"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.le.acme.email=tu-email@ejemplo.com"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -57,6 +77,17 @@ services:
     volumes:
       - mysql_catalog_data:/var/lib/mysql
 
+  mysql-clinic:
+    image: mysql:8.0
+    container_name: mysql-clinic
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: clinic_management_db
+    ports:
+      - "3311:3306"
+    volumes:
+      - mysql_clinic_data:/var/lib/mysql
+
   # Service discovery (Eureka)
   service-discovery:
     build: ./service-discovery
@@ -73,6 +104,12 @@ services:
     container_name: api-gateway
     ports:
       - "8080:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway.rule=Host(`dentify-microservices.eastus2.cloudapp.azure.com`)"
+      - "traefik.http.routers.gateway.entrypoints=websecure"
+      - "traefik.http.routers.gateway.tls=true"
+      - "traefik.http.routers.gateway.tls.certresolver=le"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - EUREKA_URL=http://service-discovery:8761/eureka/
@@ -161,9 +198,28 @@ services:
       - service-discovery
     restart: unless-stopped
 
+  clinic-management-service:
+    build: ./clinic-management-service
+    container_name: clinic-management-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-clinic:3306/clinic_management_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123
+      - EUREKA_URL=http://service-discovery:8761/eureka/
+    depends_on:
+      - mysql-clinic
+      - service-discovery
+    restart: unless-stopped
+
+
 volumes:
   rabbitmq_data:
   mysql_iam_data:
   mysql_patient_data:
   mysql_practice_data:
   mysql_catalog_data:
+  mysql_clinic_data:
+  traefik-acme:
