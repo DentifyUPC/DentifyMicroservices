@@ -59,7 +59,6 @@ public class ItemPerClinicController {
                         .body(Map.of("error", "Unable to create ItemPerClinic"));
             }
 
-            // convertir a DTO de salida
             var response = ItemPerClinicResourceFromEntityAssembler.toResourceFromEntity(itemPerClinic.get());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
