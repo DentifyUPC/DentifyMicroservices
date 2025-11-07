@@ -18,6 +18,7 @@ public class OdontologistCommandFromResourceAssembler {
                 request.specialtyRegistrationNumber(),
                 request.specialty(),
                 request.serviceId(),
+                request.shiftName(),
                 request.isActive()
         );
     }

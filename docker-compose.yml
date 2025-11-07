@@ -88,6 +88,17 @@ services:
     volumes:
       - mysql_clinic_data:/var/lib/mysql
 
+  mysql-appointment:
+    image: mysql:8.0
+    container_name: mysql-appointment
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: appointment_db
+    ports:
+      - "3312:3306"
+    volumes:
+      - mysql_appointment_data:/var/lib/mysql
+
   # Service discovery (Eureka)
   service-discovery:
     build: ./service-discovery
@@ -214,6 +225,22 @@ services:
       - service-discovery
     restart: unless-stopped
 
+  appointment-service:
+    build: ./appointment-service
+    container_name: appointment-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-appointment:3306/appointment_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123
+      - EUREKA_URL=http://service-discovery:8761/eureka/
+    depends_on:
+      - mysql-appointment
+      - service-discovery
+    restart: unless-stopped
+
 
 volumes:
   rabbitmq_data:
@@ -222,4 +249,5 @@ volumes:
   mysql_practice_data:
   mysql_catalog_data:
   mysql_clinic_data:
+  mysql_appointment_data:
   traefik-acme:

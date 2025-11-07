@@ -14,6 +14,7 @@ public record UpdateOdontologistCommand(
         String specialtyRegistrationNumber,
         String specialty,
         Long serviceId,
+        String shiftName,
         boolean isActive
 ) {
 }

@@ -39,11 +39,11 @@ public class Odontologist extends AuditableAbstractAggregateRoot<Odontologist> {
     @Column(name = "clinic_id", nullable = false)
     private Long clinicId;
 
-    @Column(name = "professional_license_number", unique = true, length = 6)
-    @Pattern(regexp = "^[0-9]{4,6}$", message = "El número de colegiatura debe tener entre 4 y 6 dígitos")
+    @Column(name = "professional_license_number", unique = true, length = 10)
+    @Pattern(regexp = "^(CMP)-[0-9]{4,6}$", message = "El número de colegiatura debe tener entre 4 y 6 dígitos")
     private String professionalLicenseNumber;
 
-    @Column(name = "specialty_registration_number", unique = true, length = 15)
+    @Column(name = "specialty_registration_number", length = 15)
     @Pattern(regexp = "^(ESP|RENES)-[0-9]{3,6}$", message = "El número de registro de especialidad debe seguir el formato ESP-000 o RENES-0000")
     private String specialtyRegistrationNumber;
 
@@ -55,6 +55,9 @@ public class Odontologist extends AuditableAbstractAggregateRoot<Odontologist> {
 
     @Column(name = "service_id")
     private Long serviceId;
+
+    @Column(name = "shift_name")
+    private String shiftName;
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
@@ -85,6 +88,7 @@ public class Odontologist extends AuditableAbstractAggregateRoot<Odontologist> {
             String specialtyRegistrationNumber,
             String specialty,
             Long serviceId,
+            String shiftName,
             boolean isActive
     ) {
         if (gender != null) this.gender = gender;
@@ -109,6 +113,10 @@ public class Odontologist extends AuditableAbstractAggregateRoot<Odontologist> {
 
         if (serviceId != null) {
             this.serviceId = serviceId;
+        }
+
+        if (shiftName != null && !shiftName.isBlank()) {
+            this.shiftName = shiftName;
         }
 
         this.isActive = isActive;

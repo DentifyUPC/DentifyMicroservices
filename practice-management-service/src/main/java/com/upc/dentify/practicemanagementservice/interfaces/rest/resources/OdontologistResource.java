@@ -19,6 +19,7 @@ public record OdontologistResource(
         String specialty,
         Long userId,
         Long serviceId,
+        String shiftName,
         boolean isActive
 ) {
 }

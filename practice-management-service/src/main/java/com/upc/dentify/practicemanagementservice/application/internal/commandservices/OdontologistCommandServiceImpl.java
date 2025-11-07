@@ -1,6 +1,7 @@
 package com.upc.dentify.practicemanagementservice.application.internal.commandservices;
 
 import com.upc.dentify.practicemanagementservice.application.internal.outboundservices.ExternalServicePerClinicService;
+import com.upc.dentify.practicemanagementservice.application.internal.outboundservices.ExternalShiftService;
 import com.upc.dentify.practicemanagementservice.config.RabbitConfig;
 import com.upc.dentify.practicemanagementservice.domain.model.aggregates.Odontologist;
 import com.upc.dentify.practicemanagementservice.domain.model.commands.UpdateOdontologistCommand;
@@ -21,12 +22,15 @@ public class OdontologistCommandServiceImpl implements OdontologistCommandServic
     private final OdontologistRepository odontologistRepository;
     private final Logger log = LoggerFactory.getLogger(OdontologistCommandServiceImpl.class);
     private final ExternalServicePerClinicService externalServicePerClinicService;
+    private final ExternalShiftService externalShiftService;
 
     public OdontologistCommandServiceImpl(OdontologistRepository odontologistRepository,
-                                          ExternalServicePerClinicService externalServicePerClinicService
+                                          ExternalServicePerClinicService externalServicePerClinicService,
+                                          ExternalShiftService externalShiftService
     ) {
         this.odontologistRepository = odontologistRepository;
         this.externalServicePerClinicService = externalServicePerClinicService;
+        this.externalShiftService = externalShiftService;
     }
 
 
@@ -34,13 +38,26 @@ public class OdontologistCommandServiceImpl implements OdontologistCommandServic
     public Optional<Odontologist> handle(UpdateOdontologistCommand command) {
         return odontologistRepository.findById(command.odontologistId())
                 .map(odontologist -> {
+                    Long clinicId = odontologist.getClinicId();
                     if (command.serviceId() != null) {
-                        Long clinicId = odontologist.getClinicId();
                         boolean exists = externalServicePerClinicService
                                 .existsByClinicIdAndServiceId(clinicId, command.serviceId());
                         if (!exists) {
                             throw new IllegalArgumentException(
                                     "Service id " + command.serviceId() +
+                                            " is not available in Clinic " + clinicId
+                            );
+                        }
+                    }
+
+                    if (command.shiftName() != null) {
+                        var shifts = externalShiftService.getAllShiftsByClinicId(clinicId);
+                        var shiftOpt = shifts.stream()
+                                .filter(shift -> shift.name().equalsIgnoreCase(command.shiftName()))
+                                .findFirst();
+                        if (shiftOpt.isEmpty()) {
+                            throw new IllegalArgumentException(
+                                    "Shift name " + command.shiftName() +
                                             " is not available in Clinic " + clinicId
                             );
                         }
@@ -67,6 +84,7 @@ public class OdontologistCommandServiceImpl implements OdontologistCommandServic
                             command.specialtyRegistrationNumber(),
                             command.specialty(),
                             command.serviceId(),
+                            command.shiftName(),
                             command.isActive()
                     );
 

@@ -1,6 +1,5 @@
 package com.upc.dentify.clinicmanagementservice.application.internal.outboundservices.acl;
 
-import com.upc.dentify.clinicmanagementservice.interfaces.rest.dtos.ItemRequiredResource;
 import com.upc.dentify.clinicmanagementservice.interfaces.rest.dtos.ServiceResource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

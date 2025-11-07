@@ -11,6 +11,7 @@ public record UpdateOdontologistRequestResource(
         String specialtyRegistrationNumber,
         String specialty,
         Long serviceId,
+        String shiftName,
         boolean isActive
 ) {
 }

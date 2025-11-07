@@ -24,6 +24,7 @@ public class OdontologistResourceFromEntityAssembler {
                 entity.getSpecialty(),
                 entity.getUserId(),
                 entity.getServiceId(),
+                entity.getShiftName(),
                 entity.isActive()
         );
     }

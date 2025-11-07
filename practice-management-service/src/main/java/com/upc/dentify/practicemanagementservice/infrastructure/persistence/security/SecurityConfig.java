@@ -12,9 +12,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final GatewayHeaderAuthFilter gatewayHeaderAuthFilter;
+    private final InternalServiceAuthFilter internalServiceAuthFilter;
 
-    public SecurityConfig(GatewayHeaderAuthFilter gatewayHeaderAuthFilter) {
+    public SecurityConfig(GatewayHeaderAuthFilter gatewayHeaderAuthFilter,
+                          InternalServiceAuthFilter internalServiceAuthFilter) {
         this.gatewayHeaderAuthFilter = gatewayHeaderAuthFilter;
+        this.internalServiceAuthFilter = internalServiceAuthFilter;
     }
 
     @Bean
@@ -22,12 +25,14 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("api/v1/acl/**").permitAll()
                         .requestMatchers("/api/v1/patients/**", "/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
+        http.addFilterBefore(internalServiceAuthFilter, UsernamePasswordAuthenticationFilter.class);
         // Register our filter early in the chain
-        http.addFilterBefore(gatewayHeaderAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(gatewayHeaderAuthFilter, InternalServiceAuthFilter.class);
 
         // No sessions
         http.sessionManagement(session -> session.sessionCreationPolicy(

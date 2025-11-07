@@ -4,6 +4,7 @@ import com.upc.dentify.clinicmanagementservice.domain.model.aggregates.Shift;
 import com.upc.dentify.clinicmanagementservice.domain.model.queries.GetAllShiftsByClinicIdQuery;
 import com.upc.dentify.clinicmanagementservice.domain.services.ShiftQueryService;
 import com.upc.dentify.clinicmanagementservice.infrastructure.persistence.jpa.repositories.ShiftRepository;
+import com.upc.dentify.clinicmanagementservice.interfaces.rest.dtos.ShiftResource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,5 +21,10 @@ public class ShiftQueryServiceImpl implements ShiftQueryService {
     @Override
     public List<Shift> handle(GetAllShiftsByClinicIdQuery query) {
         return shiftRepository.findAllByClinicId(query.clinicId());
+    }
+
+    @Override
+    public List<ShiftResource> handleDto(GetAllShiftsByClinicIdQuery query) {
+        return shiftRepository.findAllShiftResourcesByClinicId(query.clinicId());
     }
 }
