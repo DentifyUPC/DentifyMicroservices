@@ -1,12 +1,14 @@
 package com.upc.dentify.patientattentionservice.application.internal.commandservices;
 
 import com.upc.dentify.patientattentionservice.config.RabbitConfig;
+import com.upc.dentify.patientattentionservice.domain.model.aggregates.Anamnesis;
 import com.upc.dentify.patientattentionservice.domain.model.aggregates.Patient;
 import com.upc.dentify.patientattentionservice.domain.model.commands.UpdatePatientCommand;
 import com.upc.dentify.patientattentionservice.domain.model.events.UserCreatedEvent;
 import com.upc.dentify.patientattentionservice.domain.model.events.UserUpdatedEvent;
 import com.upc.dentify.patientattentionservice.domain.model.valueobjects.Address;
 import com.upc.dentify.patientattentionservice.domain.services.PatientCommandService;
+import com.upc.dentify.patientattentionservice.infrastructure.persistence.jpa.repositories.AnamnesisRepository;
 import com.upc.dentify.patientattentionservice.infrastructure.persistence.jpa.repositories.PatientRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +20,13 @@ import java.util.Optional;
 @Service
 public class PatientCommandServiceImpl implements PatientCommandService {
     private final PatientRepository patientRepository;
+    private final AnamnesisRepository anamnesisRepository;
     private final Logger log = LoggerFactory.getLogger(PatientCommandServiceImpl.class);
 
-    public PatientCommandServiceImpl(PatientRepository patientRepository) {
+    public PatientCommandServiceImpl(PatientRepository patientRepository,
+                                     AnamnesisRepository anamnesisRepository) {
         this.patientRepository = patientRepository;
+        this.anamnesisRepository = anamnesisRepository;
     }
 
     @Override
@@ -73,8 +78,11 @@ public class PatientCommandServiceImpl implements PatientCommandService {
                 event.getEmail(),
                 event.getClinicId());
 
+        var anamnesis = new Anamnesis();
+
         try {
             patientRepository.save(patient);
+            anamnesisRepository.save(anamnesis);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
