@@ -12,6 +12,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
@@ -36,6 +38,10 @@ public class Appointment extends AuditableAbstractAggregateRoot<Appointment> {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    @Column(name = "appointment_date", nullable = false)
+    private LocalDate appointmentDate;
+
     @Column(name = "shift_name", nullable = false)
     private String shiftName;
 
@@ -50,6 +56,7 @@ public class Appointment extends AuditableAbstractAggregateRoot<Appointment> {
         this.odontologistId = command.odontologistId();
         this.startTime = command.startTime();
         this.endTime = command.endTime();
+        this.appointmentDate = command.appointmentDate();
         this.shiftName = command.shiftName();
         this.clinicId = command.clinicId();
     }

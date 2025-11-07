@@ -76,7 +76,10 @@ public class AppointmentCommandServiceImpl implements AppointmentCommandService 
 
         //Validar 6 horas máx de citas en el mismo día
         var existingAppointments = appointmentRepository.findAllByOdontologistId(command.odontologistId());
-        double totalHours = existingAppointments.stream()
+        var sameDayAppointments = existingAppointments.stream()
+                .filter(a -> a.getAppointmentDate().equals(command.appointmentDate()))
+                .toList();
+        double totalHours = sameDayAppointments.stream()
                 .mapToDouble(a -> Duration.between(a.getStartTime(), a.getEndTime()).toMinutes() / 60.0)
                 .sum();
 

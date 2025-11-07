@@ -1,10 +1,12 @@
 package com.upc.dentify.appointmentservice.domain.model.command;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record CreateAppointmentCommand(
         Long patientId, Long odontologistId,
-        LocalTime startTime, LocalTime endTime, String shiftName, Long clinicId
+        LocalTime startTime, LocalTime endTime, LocalDate appointmentDate,
+        String shiftName, Long clinicId
 ) {
     public CreateAppointmentCommand {
         if (patientId == null || patientId <= 0L) {
@@ -21,6 +23,10 @@ public record CreateAppointmentCommand(
 
         if (endTime == null) {
             throw new IllegalArgumentException("endTime must not be null");
+        }
+
+        if (appointmentDate == null) {
+            throw new IllegalArgumentException("appointmentDate must not be null");
         }
 
         if (shiftName == null || shiftName.isBlank()) {

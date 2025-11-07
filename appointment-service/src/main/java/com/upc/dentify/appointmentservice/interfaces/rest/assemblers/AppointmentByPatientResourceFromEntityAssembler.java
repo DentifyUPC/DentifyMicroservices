@@ -16,6 +16,8 @@ public class AppointmentByPatientResourceFromEntityAssembler {
                 entity.getShiftName(),
                 entity.getStartTime(),
                 entity.getEndTime(),
+                entity.getAppointmentDate(),
+                entity.getAppointmentDate().getDayOfWeek().name(),
                 entity.getClinicId()
         );
     }

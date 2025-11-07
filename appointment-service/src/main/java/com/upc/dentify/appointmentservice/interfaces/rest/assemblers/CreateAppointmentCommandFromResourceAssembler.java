@@ -10,6 +10,7 @@ public class CreateAppointmentCommandFromResourceAssembler {
                 resource.odontologistId(),
                 resource.startTime(),
                 resource.endTime(),
+                resource.appointmentDate(),
                 resource.shiftName(),
                 resource.clinicId()
         );

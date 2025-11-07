@@ -13,6 +13,8 @@ public class AppointmentResourceFromEntityAssembler {
                 entity.getShiftName(),
                 entity.getStartTime(),
                 entity.getEndTime(),
+                entity.getAppointmentDate(),
+                entity.getAppointmentDate().getDayOfWeek().name(),
                 entity.getClinicId()
         );
     }
