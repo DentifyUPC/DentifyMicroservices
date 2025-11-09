@@ -1,0 +1,37 @@
+[
+  { "code": 11, "name": "Incisivo central superior derecho" },
+  { "code": 12, "name": "Incisivo lateral superior derecho" },
+  { "code": 13, "name": "Canino superior derecho" },
+  { "code": 14, "name": "Primer premolar superior derecho" },
+  { "code": 15, "name": "Segundo premolar superior derecho" },
+  { "code": 16, "name": "Primer molar superior derecho" },
+  { "code": 17, "name": "Segundo molar superior derecho" },
+  { "code": 18, "name": "Tercer molar superior derecho" },
+
+  { "code": 21, "name": "Incisivo central superior izquierdo" },
+  { "code": 22, "name": "Incisivo lateral superior izquierdo" },
+  { "code": 23, "name": "Canino superior izquierdo" },
+  { "code": 24, "name": "Primer premolar superior izquierdo" },
+  { "code": 25, "name": "Segundo premolar superior izquierdo" },
+  { "code": 26, "name": "Primer molar superior izquierdo" },
+  { "code": 27, "name": "Segundo molar superior izquierdo" },
+  { "code": 28, "name": "Tercer molar superior izquierdo" },
+
+  { "code": 41, "name": "Incisivo central inferior derecho" },
+  { "code": 42, "name": "Incisivo lateral inferior derecho" },
+  { "code": 43, "name": "Canino inferior derecho" },
+  { "code": 44, "name": "Primer premolar inferior derecho" },
+  { "code": 45, "name": "Segundo premolar inferior derecho" },
+  { "code": 46, "name": "Primer molar inferior derecho" },
+  { "code": 47, "name": "Segundo molar inferior derecho" },
+  { "code": 48, "name": "Tercer molar inferior derecho" },
+
+  { "code": 31, "name": "Incisivo central inferior izquierdo" },
+  { "code": 32, "name": "Incisivo lateral inferior izquierdo" },
+  { "code": 33, "name": "Canino inferior izquierdo" },
+  { "code": 34, "name": "Primer premolar inferior izquierdo" },
+  { "code": 35, "name": "Segundo premolar inferior izquierdo" },
+  { "code": 36, "name": "Primer molar inferior izquierdo" },
+  { "code": 37, "name": "Segundo molar inferior izquierdo" },
+  { "code": 38, "name": "Tercer molar inferior izquierdo" }
+]

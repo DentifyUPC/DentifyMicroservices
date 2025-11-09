@@ -1,0 +1,22 @@
+[
+  { "name": "Sano" },
+  { "name": "Cariado" },
+  { "name": "Obturado" },
+  { "name": "Ausente" },
+  { "name": "Extraído" },
+  { "name": "Endodonciado" },
+  { "name": "Con corona" },
+  { "name": "Con puente" },
+  { "name": "Con fractura" },
+  { "name": "Con movilidad" },
+  { "name": "Con tratamiento periodontal" },
+  { "name": "En erupción" },
+  { "name": "Retenido" },
+  { "name": "Impactado" },
+  { "name": "Desgaste oclusal" },
+  { "name": "Manchado o pigmentado" },
+  { "name": "Con restauración defectuosa" },
+  { "name": "Ausencia congénita" },
+  { "name": "Prótesis fija" },
+  { "name": "Prótesis removible" }
+]

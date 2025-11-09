@@ -1,32 +1,44 @@
 package com.upc.dentify.patientattentionservice.application.internal.commandservices;
 
 import com.upc.dentify.patientattentionservice.config.RabbitConfig;
-import com.upc.dentify.patientattentionservice.domain.model.aggregates.Anamnesis;
-import com.upc.dentify.patientattentionservice.domain.model.aggregates.Patient;
+import com.upc.dentify.patientattentionservice.domain.model.aggregates.*;
 import com.upc.dentify.patientattentionservice.domain.model.commands.UpdatePatientCommand;
 import com.upc.dentify.patientattentionservice.domain.model.events.UserCreatedEvent;
 import com.upc.dentify.patientattentionservice.domain.model.events.UserUpdatedEvent;
 import com.upc.dentify.patientattentionservice.domain.model.valueobjects.Address;
 import com.upc.dentify.patientattentionservice.domain.services.PatientCommandService;
-import com.upc.dentify.patientattentionservice.infrastructure.persistence.jpa.repositories.AnamnesisRepository;
-import com.upc.dentify.patientattentionservice.infrastructure.persistence.jpa.repositories.PatientRepository;
+import com.upc.dentify.patientattentionservice.infrastructure.persistence.jpa.repositories.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
 public class PatientCommandServiceImpl implements PatientCommandService {
     private final PatientRepository patientRepository;
     private final AnamnesisRepository anamnesisRepository;
+    private final OdontogramRepository odontogramRepository;
+    private final OdontogramItemRepository odontogramItemRepository;
+    private final TeethRepository teethRepository;
+    private final ToothStatusRepository toothStatusRepository;
     private final Logger log = LoggerFactory.getLogger(PatientCommandServiceImpl.class);
 
     public PatientCommandServiceImpl(PatientRepository patientRepository,
-                                     AnamnesisRepository anamnesisRepository) {
+                                     AnamnesisRepository anamnesisRepository,
+                                     OdontogramRepository odontogramRepository,
+                                     TeethRepository teethRepository,
+                                     ToothStatusRepository toothStatusRepository,
+                                     OdontogramItemRepository odontogramItemRepository) {
         this.patientRepository = patientRepository;
         this.anamnesisRepository = anamnesisRepository;
+        this.odontogramRepository = odontogramRepository;
+        this.teethRepository = teethRepository;
+        this.toothStatusRepository = toothStatusRepository;
+        this.odontogramItemRepository = odontogramItemRepository;
     }
 
     @Override
@@ -57,6 +69,7 @@ public class PatientCommandServiceImpl implements PatientCommandService {
     }
 
     @Override
+    @Transactional
     @RabbitListener(queues = RabbitConfig.USER_CREATED_QUEUE)
     public void handle(UserCreatedEvent event) {
         log.info("Recibido UserCreatedEvent: userId={}", event.getUserId());
@@ -71,6 +84,7 @@ public class PatientCommandServiceImpl implements PatientCommandService {
             throw new IllegalArgumentException("Role must be 3L: Patient");
         }
 
+        //patient
         var patient = new Patient(event.getUserId(),
                 event.getFirstName(),
                 event.getLastName(),
@@ -78,14 +92,37 @@ public class PatientCommandServiceImpl implements PatientCommandService {
                 event.getEmail(),
                 event.getClinicId());
 
+        patientRepository.save(patient);
+
+        //anamnesis
         var anamnesis = new Anamnesis();
 
-        try {
-            patientRepository.save(patient);
-            anamnesisRepository.save(anamnesis);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        anamnesisRepository.save(anamnesis);
+
+        //odontogram
+        var odontogram = new Odontogram();
+
+        odontogramRepository.save(odontogram);
+
+        //odontogram items
+        var allTeeth = teethRepository.findAll();
+
+        ToothStatus defaultStatus = toothStatusRepository.findByName("Sano")
+                .orElseThrow(() -> new IllegalStateException("No tooth statuses configured"));
+
+        var items = new ArrayList<OdontogramItem>();
+        for (Teeth tooth : allTeeth) {
+            var item = new OdontogramItem();
+            item.setTeeth(tooth);
+            item.setToothStatus(defaultStatus);
+            item.setOdontogram(odontogram);
+            items.add(item);
         }
+
+        if (!items.isEmpty()) {
+            odontogramItemRepository.saveAll(items);
+        }
+
     }
 
     @Override

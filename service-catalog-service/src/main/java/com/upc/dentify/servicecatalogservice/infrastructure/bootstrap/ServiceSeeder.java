@@ -22,7 +22,6 @@ public class ServiceSeeder {
     }
 
     public void seed() {
-//        if (serviceRepository.count() > 0) return;
 
         try (InputStream inputStream = getClass().getResourceAsStream("/seed/services.json")) {
             List<ServiceResourceFromJson> serviceDtos =

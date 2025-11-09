@@ -25,27 +25,7 @@ public class ItemSeeder{
         this.objectMapper = objectMapper;
     }
 
-//    @Override
-//    public void run(String... args) throws Exception {
-//        if (itemRepository.count() > 0) return; // avoid duplicates
-//
-//        InputStream inputStream = getClass().getResourceAsStream("/seed/items.json");
-//        List<ItemResourceFromJson> items = objectMapper.readValue(
-//                inputStream,
-//                new TypeReference<List<ItemResourceFromJson>>() {}
-//        );
-//
-//        for (ItemResourceFromJson dto : items) {
-//            UnitType unitType = unitTypeRepository.findByName(dto.unitType())
-//                    .orElseThrow(() -> new RuntimeException("UnitType not found: " + dto.unitType()));
-//
-//            itemRepository.findByName(dto.name())
-//                    .orElseGet(() -> itemRepository.save(new Item(dto.name(), unitType)));
-//        }
-//    }
-
     public void seed() {
-//        if (unitTypeRepository.count() > 0) return;
 
         try (InputStream inputStream = getClass().getResourceAsStream("/seed/items.json")) {
             List<ItemResourceFromJson> items =
