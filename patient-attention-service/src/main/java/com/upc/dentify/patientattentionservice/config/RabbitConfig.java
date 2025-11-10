@@ -18,10 +18,13 @@ import java.util.Map;
 public class RabbitConfig {
 
     public static final String EXCHANGE = "user.events";
+    public static final String EXCHANGE_APPOINTMENT = "appointment.events";
     public static final String USER_CREATED_ROUTING_KEY = "user.created";
     public static final String USER_CREATED_QUEUE = "user.created";
     public static final String USER_UPDATED_ROUTING_KEY = "user.updated";
     public static final String USER_UPDATED_QUEUE = "user.updated";
+    public static final String APPOINTMENT_CREATED_ROUTING_KEY = "appointment.created";
+    public static final String APPOINTMENT_CREATED_QUEUE = "appointment.created";
 
     @Bean
     public Queue userCreatedQueue() {
@@ -37,6 +40,18 @@ public class RabbitConfig {
         return BindingBuilder.bind(userCreatedQueue)
                 .to(new TopicExchange(EXCHANGE))
                 .with(USER_CREATED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue appointmentCreatedQueue() {
+        return new Queue(APPOINTMENT_CREATED_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingAppointmentCreated(Queue appointmentCreatedQueue) {
+        return BindingBuilder.bind(appointmentCreatedQueue)
+                .to(new TopicExchange(EXCHANGE_APPOINTMENT))
+                .with(APPOINTMENT_CREATED_ROUTING_KEY);
     }
 
     @Bean
@@ -68,5 +83,8 @@ public class RabbitConfig {
     public TopicExchange userExchange() {
         return new TopicExchange(RabbitConfig.EXCHANGE, true, false);
     }
+
+    @Bean
+    public TopicExchange appointmentExchange() {return  new TopicExchange(RabbitConfig.EXCHANGE_APPOINTMENT, true, false);}
 }
 

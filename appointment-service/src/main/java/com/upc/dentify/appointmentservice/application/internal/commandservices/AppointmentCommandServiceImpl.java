@@ -4,12 +4,16 @@ import com.upc.dentify.appointmentservice.application.internal.outboundservices.
 import com.upc.dentify.appointmentservice.application.internal.outboundservices.ExternalOdontologistService;
 import com.upc.dentify.appointmentservice.application.internal.outboundservices.ExternalPatientService;
 import com.upc.dentify.appointmentservice.application.internal.outboundservices.ExternalShiftService;
+import com.upc.dentify.appointmentservice.domain.events.AppointmentCreatedEvent;
 import com.upc.dentify.appointmentservice.domain.model.aggregates.Appointment;
 import com.upc.dentify.appointmentservice.domain.model.command.CreateAppointmentCommand;
 import com.upc.dentify.appointmentservice.domain.model.command.UpdateAppointmentCommand;
 import com.upc.dentify.appointmentservice.domain.model.valueobjects.State;
 import com.upc.dentify.appointmentservice.domain.services.AppointmentCommandService;
 import com.upc.dentify.appointmentservice.infrastructure.persistence.jpa.repositories.AppointmentRepository;
+import com.upc.dentify.appointmentservice.messaging.AppointmentCreatedDomainEvent;
+import jakarta.transaction.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -22,19 +26,23 @@ public class AppointmentCommandServiceImpl implements AppointmentCommandService 
     private final ExternalShiftService externalShiftService;
     private final ExternalPatientService externalPatientService;
     private final ExternalClinicService externalClinicService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AppointmentCommandServiceImpl(AppointmentRepository appointmentRepository,
                                          ExternalOdontologistService externalOdontologistService,
                                          ExternalShiftService externalShiftService,
                                          ExternalPatientService externalPatientService,
-                                         ExternalClinicService externalClinicService) {
+                                         ExternalClinicService externalClinicService,
+                                         ApplicationEventPublisher eventPublisher) {
         this.appointmentRepository = appointmentRepository;
         this.externalOdontologistService = externalOdontologistService;
         this.externalShiftService = externalShiftService;
         this.externalPatientService = externalPatientService;
         this.externalClinicService = externalClinicService;
+        this.eventPublisher = eventPublisher;
     }
 
+    @Transactional
     @Override
     public Optional<Appointment> handle(CreateAppointmentCommand command) {
         if (!externalClinicService.existsByClinicId(command.clinicId())) {
@@ -91,6 +99,13 @@ public class AppointmentCommandServiceImpl implements AppointmentCommandService 
 
         Appointment appointment = new Appointment(command);
         appointmentRepository.save(appointment);
+
+        AppointmentCreatedEvent payload = new AppointmentCreatedEvent(
+                appointment.getId(),
+                appointment.getOdontologistId(),
+                appointment.getPatientId()
+        );
+        eventPublisher.publishEvent(new AppointmentCreatedDomainEvent(payload));
 
         return Optional.of(appointment);
     }

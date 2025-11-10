@@ -25,6 +25,7 @@ public class PatientCommandServiceImpl implements PatientCommandService {
     private final OdontogramItemRepository odontogramItemRepository;
     private final TeethRepository teethRepository;
     private final ToothStatusRepository toothStatusRepository;
+    private final ClinicalRecordRepository clinicalRecordRepository;
     private final Logger log = LoggerFactory.getLogger(PatientCommandServiceImpl.class);
 
     public PatientCommandServiceImpl(PatientRepository patientRepository,
@@ -32,13 +33,15 @@ public class PatientCommandServiceImpl implements PatientCommandService {
                                      OdontogramRepository odontogramRepository,
                                      TeethRepository teethRepository,
                                      ToothStatusRepository toothStatusRepository,
-                                     OdontogramItemRepository odontogramItemRepository) {
+                                     OdontogramItemRepository odontogramItemRepository,
+                                     ClinicalRecordRepository clinicalRecordRepository) {
         this.patientRepository = patientRepository;
         this.anamnesisRepository = anamnesisRepository;
         this.odontogramRepository = odontogramRepository;
         this.teethRepository = teethRepository;
         this.toothStatusRepository = toothStatusRepository;
         this.odontogramItemRepository = odontogramItemRepository;
+        this.clinicalRecordRepository = clinicalRecordRepository;
     }
 
     @Override
@@ -92,17 +95,17 @@ public class PatientCommandServiceImpl implements PatientCommandService {
                 event.getEmail(),
                 event.getClinicId());
 
-        patientRepository.save(patient);
+        var patientResponse = patientRepository.save(patient);
 
         //anamnesis
         var anamnesis = new Anamnesis();
 
-        anamnesisRepository.save(anamnesis);
+        var anamnesisResponse = anamnesisRepository.save(anamnesis);
 
         //odontogram
         var odontogram = new Odontogram();
 
-        odontogramRepository.save(odontogram);
+        var odontogramResponse = odontogramRepository.save(odontogram);
 
         //odontogram items
         var allTeeth = teethRepository.findAll();
@@ -123,6 +126,10 @@ public class PatientCommandServiceImpl implements PatientCommandService {
             odontogramItemRepository.saveAll(items);
         }
 
+        var clinicalRecord = new ClinicalRecords(patientResponse.getId(),
+                anamnesisResponse.getId(), odontogramResponse.getId());
+
+        clinicalRecordRepository.save(clinicalRecord);
     }
 
     @Override

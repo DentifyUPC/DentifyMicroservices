@@ -36,4 +36,8 @@ public class Anamnesis extends AuditableAbstractAggregateRoot<Anamnesis> {
         this.highBloodPressure = false;
         this.smoke = false;
     }
+
+    public Anamnesis(Long anamnesisId) {
+        this.setId(anamnesisId);
+    }
 }

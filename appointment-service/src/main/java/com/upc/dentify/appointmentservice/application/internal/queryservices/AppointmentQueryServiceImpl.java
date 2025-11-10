@@ -1,6 +1,7 @@
 package com.upc.dentify.appointmentservice.application.internal.queryservices;
 
 import com.upc.dentify.appointmentservice.domain.model.aggregates.Appointment;
+import com.upc.dentify.appointmentservice.domain.model.queries.GetAppointmentByIdQuery;
 import com.upc.dentify.appointmentservice.domain.model.queries.GetAppointmentByOdontologistIdQuery;
 import com.upc.dentify.appointmentservice.domain.model.queries.GetAppointmentByPatientIdQuery;
 import com.upc.dentify.appointmentservice.domain.services.AppointmentQueryService;
@@ -8,6 +9,7 @@ import com.upc.dentify.appointmentservice.infrastructure.persistence.jpa.reposit
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AppointmentQueryServiceImpl implements AppointmentQueryService {
@@ -25,5 +27,10 @@ public class AppointmentQueryServiceImpl implements AppointmentQueryService {
     @Override
     public List<Appointment> handle(GetAppointmentByPatientIdQuery query) {
         return appointmentRepository.findAllByPatientId(query.patientId());
+    }
+
+    @Override
+    public Optional<Appointment> handle(GetAppointmentByIdQuery query) {
+        return appointmentRepository.findById(query.id());
     }
 }

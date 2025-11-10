@@ -8,4 +8,7 @@ public class Odontogram extends AuditableAbstractAggregateRoot<Odontogram> {
 
     public Odontogram() {}
 
+    public Odontogram(Long id) {
+        this.setId(id);
+    }
 }

@@ -41,6 +41,10 @@ public class Patient extends AuditableAbstractAggregateRoot<Patient> {
 
     public Patient() {}
 
+    public Patient(Long patientId) {
+        this.setId(patientId);
+    }
+
     public Integer getAge() {
         if (birthDate != null) {
             return birthDate.calculateAge();
