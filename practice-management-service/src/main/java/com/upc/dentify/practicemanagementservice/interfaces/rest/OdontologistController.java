@@ -1,6 +1,7 @@
 package com.upc.dentify.practicemanagementservice.interfaces.rest;
 
 import com.upc.dentify.practicemanagementservice.domain.model.queries.GetAllOdontologistByClinicId;
+import com.upc.dentify.practicemanagementservice.domain.model.queries.GetAllOdontologistByShiftName;
 import com.upc.dentify.practicemanagementservice.domain.model.queries.GetOdontologistById;
 import com.upc.dentify.practicemanagementservice.domain.model.queries.GetOdontologistByUserId;
 import com.upc.dentify.practicemanagementservice.domain.services.OdontologistCommandService;
@@ -66,5 +67,14 @@ public class OdontologistController {
                 .map(odontologist -> ResponseEntity.ok(
                         OdontologistResourceFromEntityAssembler.toResource(odontologist)
                 )).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PreAuthorize("hasAuthority('PATIENT')")
+    @GetMapping("/shift/{shiftName}/odontologists")
+    public List<OdontologistResource> getAllOdontologistByShiftName(@PathVariable("shiftName") String shiftName) {
+        var odontologist = odontologistQueryService.handle(new GetAllOdontologistByShiftName(shiftName));
+        return odontologist.stream()
+                .map(OdontologistResourceFromEntityAssembler::toResource)
+                .toList();
     }
 }

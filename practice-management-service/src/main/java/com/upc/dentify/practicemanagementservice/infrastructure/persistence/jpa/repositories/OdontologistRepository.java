@@ -10,4 +10,5 @@ public interface OdontologistRepository extends JpaRepository<Odontologist, Long
     List<Odontologist> findByClinicId(Long clinicId);
     Optional<Odontologist> findByUserId(Long userId);
     Boolean existsByUserId(Long userId);
+    List<Odontologist> findAllByShiftName(String shiftName);
 }

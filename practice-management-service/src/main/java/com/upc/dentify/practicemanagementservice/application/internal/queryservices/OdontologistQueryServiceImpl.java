@@ -2,6 +2,7 @@ package com.upc.dentify.practicemanagementservice.application.internal.queryserv
 
 import com.upc.dentify.practicemanagementservice.domain.model.aggregates.Odontologist;
 import com.upc.dentify.practicemanagementservice.domain.model.queries.GetAllOdontologistByClinicId;
+import com.upc.dentify.practicemanagementservice.domain.model.queries.GetAllOdontologistByShiftName;
 import com.upc.dentify.practicemanagementservice.domain.model.queries.GetOdontologistById;
 import com.upc.dentify.practicemanagementservice.domain.model.queries.GetOdontologistByUserId;
 import com.upc.dentify.practicemanagementservice.domain.services.OdontologistQueryService;
@@ -34,5 +35,10 @@ public class OdontologistQueryServiceImpl implements OdontologistQueryService {
     @Override
     public Optional<Odontologist> handle(GetOdontologistByUserId query) {
         return odontologistRepository.findByUserId(query.userId());
+    }
+
+    @Override
+    public List<Odontologist> handle(GetAllOdontologistByShiftName query) {
+        return odontologistRepository.findAllByShiftName(query.shiftName());
     }
 }
