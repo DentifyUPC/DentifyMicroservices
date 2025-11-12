@@ -17,6 +17,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Optional;
 
 @Service
@@ -72,14 +74,29 @@ public class AppointmentCommandServiceImpl implements AppointmentCommandService 
         command.endTime().isAfter(selectedShifts.endTime())) {
             throw new IllegalArgumentException("Start time and end time must be in the range of shift time");
         }
+        if (command.endTime().isBefore(command.startTime())) {
+            throw new IllegalArgumentException("End time cannot be before start time");
+        }
 
         //Validar solapamiento de horario de cita
         var overlappingAppointments = appointmentRepository.findAllByOdontologistId(command.odontologistId())
-                .stream().filter(a -> command.startTime().isBefore(a.getEndTime()) &&
+                .stream()
+                .filter(a -> a.getAppointmentDate().isEqual(command.appointmentDate()))
+                .filter(a -> command.startTime().isBefore(a.getEndTime()) &&
                         command.endTime().isAfter(a.getStartTime()))
                 .toList();
         if (!overlappingAppointments.isEmpty()) {
             throw new IllegalArgumentException("Overlapping appointments found");
+        }
+
+        //Validar que no se registre en fechas pasadas
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+        if(command.appointmentDate().isBefore(today)) {
+            throw new IllegalArgumentException("Appointment date cannot be in the past");
+        }
+        if (command.appointmentDate().isEqual(today) && command.startTime().isBefore(now)) {
+            throw new IllegalArgumentException("Start time must be later than current time");
         }
 
         //Validar 6 horas máx de citas en el mismo día
