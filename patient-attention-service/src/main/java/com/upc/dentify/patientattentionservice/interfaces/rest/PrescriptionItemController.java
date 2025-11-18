@@ -47,7 +47,6 @@ public class PrescriptionItemController {
         )).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasAnyAuthority('ODONTOLOGIST', 'ADMIN')")
     @GetMapping("/prescription/{prescriptionId}")
     public List<PrescriptionItemResource> getAllPrescriptionItemsByPrescriptionId(@PathVariable("prescriptionId") Long prescriptionId) {
         var prescriptionItems = prescriptionItemQueryService.handle(new GetAllPrescriptionItemsByPrescriptionIdQuery(prescriptionId));

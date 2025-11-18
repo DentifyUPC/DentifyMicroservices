@@ -5,9 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ClinicalRecordEntryRepository extends JpaRepository<ClinicalRecordEntries, Long> {
     Boolean existsByAppointmentId(Long appointmentId);
     List<ClinicalRecordEntries> findAllByClinicalRecords_Id(Long clinicalRecordId);
+    Optional<ClinicalRecordEntries> findByAppointmentId(Long appointmentId);
 }

@@ -1,5 +1,6 @@
 package com.upc.dentify.patientattentionservice.interfaces.rest;
 
+import com.upc.dentify.patientattentionservice.domain.model.queries.GetPrescriptionByAppointmentIdQuery;
 import com.upc.dentify.patientattentionservice.domain.model.queries.GetPrescriptionByIdQuery;
 import com.upc.dentify.patientattentionservice.domain.services.PrescriptionCommandService;
 import com.upc.dentify.patientattentionservice.domain.services.PrescriptionQueryService;
@@ -41,6 +42,16 @@ public class PrescriptionController {
     @GetMapping("/{prescriptionId}")
     public ResponseEntity<PrescriptionResource> getPrescriptionById(@PathVariable("prescriptionId") Long prescriptionId) {
         var query = new GetPrescriptionByIdQuery(prescriptionId);
+        return prescriptionQueryService.handle(query)
+                .map(prescription -> ResponseEntity.ok(
+                        PrescriptionResourceFromEntityAssembler.fromEntityToResource(prescription)
+                )).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PreAuthorize("hasAuthority('PATIENT')")
+    @GetMapping("/appointment/{appointmentId}")
+    public ResponseEntity<PrescriptionResource> getPrescriptionByAppointmentId(@PathVariable("appointmentId") Long appointmentId) {
+        var query = new GetPrescriptionByAppointmentIdQuery(appointmentId);
         return prescriptionQueryService.handle(query)
                 .map(prescription -> ResponseEntity.ok(
                         PrescriptionResourceFromEntityAssembler.fromEntityToResource(prescription)

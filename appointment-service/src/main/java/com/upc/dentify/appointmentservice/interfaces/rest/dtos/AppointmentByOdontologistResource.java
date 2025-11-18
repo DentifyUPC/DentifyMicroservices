@@ -8,6 +8,7 @@ import java.time.LocalTime;
 public record AppointmentByOdontologistResource(
         Long id,
         String state,
+        Long patientId,
         String patientFirstName,
         String patientLastName,
         String shiftName,

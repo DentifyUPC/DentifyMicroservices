@@ -11,6 +11,7 @@ public class AppointmentByOdontologistResourceFromEntityAssembler {
         return new AppointmentByOdontologistResource(
                 entity.getId(),
                 entity.getState().name(),
+                entity.getPatientId(),
                 patient.firstName(),
                 patient.lastName(),
                 entity.getShiftName(),

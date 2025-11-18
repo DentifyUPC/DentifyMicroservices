@@ -117,7 +117,7 @@ services:
       - "8080:8080"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gateway.rule=Host(`dentify-microservices.eastus2.cloudapp.azure.com`)"
+      - "traefik.http.routers.gateway.rule=Host(`dentify-microservices.eastus.cloudapp.azure.com`)"
       - "traefik.http.routers.gateway.entrypoints=websecure"
       - "traefik.http.routers.gateway.tls=true"
       - "traefik.http.routers.gateway.tls.certresolver=le"
@@ -235,9 +235,14 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-appointment:3306/appointment_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root123
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
       - EUREKA_URL=http://service-discovery:8761/eureka/
     depends_on:
       - mysql-appointment
+      - rabbitmq
       - service-discovery
     restart: unless-stopped
 
