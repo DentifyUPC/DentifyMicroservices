@@ -21,6 +21,7 @@ services:
       - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.le.acme.email=tu-email@ejemplo.com"
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -33,71 +34,16 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  mysql-iam:
-    image: mysql:8.0
-    container_name: mysql-iam
-    environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: iam_db
+  nginx:
+    image: nginx:stable
+    container_name: nginx
     ports:
-      - "3307:3306"
+      - "80:80"
     volumes:
-      - mysql_iam_data:/var/lib/mysql
-
-  mysql-patient:
-    image: mysql:8.0
-    container_name: mysql-patient
-    environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: patient_attention_db
-    ports:
-      - "3308:3306"
-    volumes:
-      - mysql_patient_data:/var/lib/mysql
-
-  mysql-practice:
-    image: mysql:8.0
-    container_name: mysql-practice
-    environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: practice_management_db
-    ports:
-      - "3309:3306"
-    volumes:
-      - mysql_practice_data:/var/lib/mysql
-
-  mysql-catalog:
-    image: mysql:8.0
-    container_name: mysql-catalog
-    environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: service_catalog_db
-    ports:
-      - "3310:3306"
-    volumes:
-      - mysql_catalog_data:/var/lib/mysql
-
-  mysql-clinic:
-    image: mysql:8.0
-    container_name: mysql-clinic
-    environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: clinic_management_db
-    ports:
-      - "3311:3306"
-    volumes:
-      - mysql_clinic_data:/var/lib/mysql
-
-  mysql-appointment:
-    image: mysql:8.0
-    container_name: mysql-appointment
-    environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: appointment_db
-    ports:
-      - "3312:3306"
-    volumes:
-      - mysql_appointment_data:/var/lib/mysql
+      - ./nginx:/etc/nginx/conf.d
+      - ./nginx-template:/etc/nginx/template
+    depends_on:
+      - service-discovery
 
   # Service discovery (Eureka)
   service-discovery:
@@ -110,9 +56,8 @@ services:
     restart: unless-stopped
 
   # API Gateway
-  api-gateway:
+  api-gateway1:
     build: ./api-gateway
-    container_name: api-gateway
     ports:
       - "8080:8080"
     labels:
@@ -124,14 +69,32 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=api-gateway1
+    depends_on:
+      - service-discovery
+    restart: unless-stopped
+
+  api-gateway2:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway.rule=Host(`dentify-microservices.eastus.cloudapp.azure.com`)"
+      - "traefik.http.routers.gateway.entrypoints=websecure"
+      - "traefik.http.routers.gateway.tls=true"
+      - "traefik.http.routers.gateway.tls.certresolver=le"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=api-gateway2
     depends_on:
       - service-discovery
     restart: unless-stopped
 
   # IAM service
-  iam-service:
+  iam-service1:
     build: ./iam-service
-    container_name: iam-service
     ports:
       - "8081:8081"
     environment:
@@ -144,6 +107,28 @@ services:
       - RABBITMQ_USER=guest
       - RABBITMQ_PASS=guest
       - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=iam-service1
+    depends_on:
+      - mysql-iam
+      - rabbitmq
+      - service-discovery
+    restart: unless-stopped
+
+  iam-service2:
+    build: ./iam-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-iam:3306/iam_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=iam-service2
     depends_on:
       - mysql-iam
       - rabbitmq
@@ -151,9 +136,8 @@ services:
     restart: unless-stopped
 
   # Patient attention
-  patient-attention-service:
+  patient-attention-service1:
     build: ./patient-attention-service
-    container_name: patient-attention-service
     ports:
       - "8082:8082"
     environment:
@@ -166,15 +150,36 @@ services:
       - RABBITMQ_USER=guest
       - RABBITMQ_PASS=guest
       - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=patient-attention-service1
     depends_on:
       - mysql-patient
       - rabbitmq
       - service-discovery
     restart: unless-stopped
 
-  practice-management-service:
+  patient-attention-service2:
+    build: ./patient-attention-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-patient:3306/patient_attention_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=patient-attention-service2
+    depends_on:
+      - mysql-patient
+      - rabbitmq
+      - service-discovery
+    restart: unless-stopped
+
+  practice-management-service1:
     build: ./practice-management-service
-    container_name: practice-management-service
     ports:
       - "8083:8083"
     environment:
@@ -187,15 +192,36 @@ services:
       - RABBITMQ_USER=guest
       - RABBITMQ_PASS=guest
       - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=practice-management-service1
     depends_on:
       - mysql-practice
       - rabbitmq
       - service-discovery
     restart: unless-stopped
 
-  service-catalog-service:
+  practice-management-service2:
+    build: ./practice-management-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-practice:3306/practice_management_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=practice-management-service2
+    depends_on:
+      - mysql-practice
+      - rabbitmq
+      - service-discovery
+    restart: unless-stopped
+
+  service-catalog-service1:
     build: ./service-catalog-service
-    container_name: service-catalog-service
     ports:
       - "8084:8084"
     environment:
@@ -204,14 +230,30 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root123
       - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=service-catalog-service1
     depends_on:
       - mysql-catalog
       - service-discovery
     restart: unless-stopped
 
-  clinic-management-service:
+  service-catalog-service2:
+    build: ./service-catalog-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-catalog:3306/service_catalog_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123
+      - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=service-catalog-service2
+    depends_on:
+      - mysql-catalog
+      - service-discovery
+    restart: unless-stopped
+
+  clinic-management-service1:
     build: ./clinic-management-service
-    container_name: clinic-management-service
     ports:
       - "8085:8085"
     environment:
@@ -220,14 +262,30 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root123
       - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=clinic-management-service1
     depends_on:
       - mysql-clinic
       - service-discovery
     restart: unless-stopped
 
-  appointment-service:
+  clinic-management-service2:
+    build: ./clinic-management-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-clinic:3306/clinic_management_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123
+      - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=clinic-management-service2
+    depends_on:
+      - mysql-clinic
+      - service-discovery
+    restart: unless-stopped
+
+  appointment-service1:
     build: ./appointment-service
-    container_name: appointment-service
     ports:
       - "8086:8086"
     environment:
@@ -240,6 +298,28 @@ services:
       - RABBITMQ_USER=guest
       - RABBITMQ_PASS=guest
       - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=appointment-service1
+    depends_on:
+      - mysql-appointment
+      - rabbitmq
+      - service-discovery
+    restart: unless-stopped
+
+  appointment-service2:
+    build: ./appointment-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-appointment:3306/appointment_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - EUREKA_URL=http://service-discovery:8761/eureka/
+      - EUREKA_INSTANCE_HOSTNAME=appointment-service2
     depends_on:
       - mysql-appointment
       - rabbitmq
@@ -249,10 +329,4 @@ services:
 
 volumes:
   rabbitmq_data:
-  mysql_iam_data:
-  mysql_patient_data:
-  mysql_practice_data:
-  mysql_catalog_data:
-  mysql_clinic_data:
-  mysql_appointment_data:
   traefik-acme:

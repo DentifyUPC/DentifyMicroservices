@@ -1,4 +1,4 @@
-package com.upc.dentify.appointmentservice.interfaces;
+package com.upc.dentify.appointmentservice.interfaces.rest;
 
 import com.upc.dentify.appointmentservice.application.internal.outboundservices.ExternalOdontologistService;
 import com.upc.dentify.appointmentservice.application.internal.outboundservices.ExternalPatientService;

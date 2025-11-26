@@ -1,4 +1,4 @@
-package com.upc.dentify.clinicmanagementservice.interfaces;
+package com.upc.dentify.clinicmanagementservice.interfaces.rest;
 
 import com.upc.dentify.clinicmanagementservice.domain.model.commands.CreateSchedulePerClinicCommand;
 import com.upc.dentify.clinicmanagementservice.domain.model.commands.UpdateSchedulePerClinicCommand;
