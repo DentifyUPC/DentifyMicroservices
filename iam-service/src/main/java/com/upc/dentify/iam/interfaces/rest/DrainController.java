@@ -1,31 +1,26 @@
 package com.upc.dentify.iam.interfaces.rest;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@RestController
-@RequestMapping("/admin")
+@Component
+@Endpoint(id = "drain")
 public class DrainController {
 
-    private final AtomicBoolean drain = new AtomicBoolean(false);
+    private final AtomicBoolean draining = new AtomicBoolean(false);
 
-    @PostMapping("/drain")
-    public ResponseEntity<String> enableDrain() {
-        drain.set(true);
-        return ResponseEntity.ok("drain enabled");
-    }
+    @WriteOperation
+    public String toggleDrain(Boolean enable) {
+        if (enable == null) return "missing 'enable' parameter";
 
-    @PostMapping("/undrain")
-    public ResponseEntity<String> disableDrain() {
-        drain.set(false);
-        return ResponseEntity.ok("drain disabled");
+        draining.set(enable);
+        return enable ? "drain enabled" : "drain disabled";
     }
 
     public boolean isDraining() {
-        return drain.get();
+        return draining.get();
     }
 }

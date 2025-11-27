@@ -37,11 +37,24 @@ services:
   nginx:
     image: nginx:stable
     container_name: nginx
-    ports:
-      - "80:80"
     volumes:
-      - ./nginx:/etc/nginx/conf.d
-      - ./nginx-template:/etc/nginx/template
+      - ./nginx:/etc/nginx
+    depends_on:
+      - service-discovery
+
+  nginx-updater:
+    build:
+      context: ./updater
+      dockerfile: Dockerfile
+    container_name: nginx-updater
+    environment:
+      - EUREKA_URL=http://eureka:8761/eureka/apps
+      - TEMPLATE_PATH=/etc/nginx-template/nginx.template
+      - OUTPUT_PATH=/etc/nginx/nginx.conf
+      - POLL_INTERVAL=15
+    volumes:
+      - ./nginx:/etc/nginx                    # comparte el mismo volumen con nginx
+      - ./nginx-template:/etc/nginx-template  # plantilla de entrada
     depends_on:
       - service-discovery
 
@@ -49,283 +62,283 @@ services:
   service-discovery:
     build: ./service-discovery
     container_name: service-discovery
-    ports:
-      - "8761:8761"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - MANAGEMENT_PORT=8079
+      - MANAGEMENT_SERVER_PORT=8079
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
     restart: unless-stopped
 
   # API Gateway
-  api-gateway1:
+  api-gateway:
     build: ./api-gateway
-    ports:
-      - "8080:8080"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gateway.rule=Host(`dentify-microservices.eastus.cloudapp.azure.com`)"
+      - "traefik.http.routers.gateway.rule=Host(`dentify-microservices.canadacentral.cloudapp.azure.com`)"
       - "traefik.http.routers.gateway.entrypoints=websecure"
       - "traefik.http.routers.gateway.tls=true"
       - "traefik.http.routers.gateway.tls.certresolver=le"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=api-gateway1
+      - EUREKA_INSTANCE_HOSTNAME=api-gateway
+      - MANAGEMENT_PORT=8079
+      - MANAGEMENT_SERVER_PORT=8079
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
     depends_on:
       - service-discovery
     restart: unless-stopped
-
-  api-gateway2:
-    build: ./api-gateway
-    ports:
-      - "8080:8080"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.gateway.rule=Host(`dentify-microservices.eastus.cloudapp.azure.com`)"
-      - "traefik.http.routers.gateway.entrypoints=websecure"
-      - "traefik.http.routers.gateway.tls=true"
-      - "traefik.http.routers.gateway.tls.certresolver=le"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=api-gateway2
-    depends_on:
-      - service-discovery
-    restart: unless-stopped
+    deploy:
+      replicas: 2
 
   # IAM service
-  iam-service1:
+  iam-service:
     build: ./iam-service
-    ports:
-      - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-iam:3306/iam_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/iam_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=dentify
+      - SPRING_DATASOURCE_PASSWORD=Clinic123
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USER=guest
       - RABBITMQ_PASS=guest
       - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=iam-service1
+      - EUREKA_INSTANCE_HOSTNAME=iam-service
+      - MANAGEMENT_PORT=8079
+      - MANAGEMENT_SERVER_PORT=8079
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
     depends_on:
-      - mysql-iam
       - rabbitmq
       - service-discovery
     restart: unless-stopped
-
-  iam-service2:
-    build: ./iam-service
-    ports:
-      - "8081:8081"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-iam:3306/iam_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_USER=guest
-      - RABBITMQ_PASS=guest
-      - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=iam-service2
-    depends_on:
-      - mysql-iam
-      - rabbitmq
-      - service-discovery
-    restart: unless-stopped
+    deploy:
+      replicas: 2
 
   # Patient attention
-  patient-attention-service1:
+  patient-attention-service:
     build: ./patient-attention-service
-    ports:
-      - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-patient:3306/patient_attention_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/patient_attention_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=dentify
+      - SPRING_DATASOURCE_PASSWORD=Clinic123
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USER=guest
       - RABBITMQ_PASS=guest
       - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=patient-attention-service1
+      - EUREKA_INSTANCE_HOSTNAME=patient-attention-service
+      - MANAGEMENT_PORT=8079
+      - MANAGEMENT_SERVER_PORT=8079
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
     depends_on:
-      - mysql-patient
       - rabbitmq
       - service-discovery
     restart: unless-stopped
+    deploy:
+      replicas: 2
 
-  patient-attention-service2:
-    build: ./patient-attention-service
-    ports:
-      - "8082:8082"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-patient:3306/patient_attention_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_USER=guest
-      - RABBITMQ_PASS=guest
-      - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=patient-attention-service2
-    depends_on:
-      - mysql-patient
-      - rabbitmq
-      - service-discovery
-    restart: unless-stopped
-
-  practice-management-service1:
+  practice-management-service:
     build: ./practice-management-service
-    ports:
-      - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-practice:3306/practice_management_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/practice_management_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=dentify
+      - SPRING_DATASOURCE_PASSWORD=Clinic123
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USER=guest
       - RABBITMQ_PASS=guest
       - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=practice-management-service1
+      - EUREKA_INSTANCE_HOSTNAME=practice-management-service
+      - MANAGEMENT_PORT=8079
+      - MANAGEMENT_SERVER_PORT=8079
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
     depends_on:
-      - mysql-practice
       - rabbitmq
       - service-discovery
     restart: unless-stopped
+    deploy:
+      replicas: 2
 
-  practice-management-service2:
-    build: ./practice-management-service
-    ports:
-      - "8083:8083"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-practice:3306/practice_management_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_USER=guest
-      - RABBITMQ_PASS=guest
-      - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=practice-management-service2
-    depends_on:
-      - mysql-practice
-      - rabbitmq
-      - service-discovery
-    restart: unless-stopped
-
-  service-catalog-service1:
+  service-catalog-service:
     build: ./service-catalog-service
-    ports:
-      - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-catalog:3306/service_catalog_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/service_catalog_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=dentify
+      - SPRING_DATASOURCE_PASSWORD=Clinic123
       - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=service-catalog-service1
+      - EUREKA_INSTANCE_HOSTNAME=service-catalog-service
+      - MANAGEMENT_PORT=8079
+      - MANAGEMENT_SERVER_PORT=8079
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
     depends_on:
-      - mysql-catalog
       - service-discovery
     restart: unless-stopped
+    deploy:
+      replicas: 2
 
-  service-catalog-service2:
-    build: ./service-catalog-service
-    ports:
-      - "8084:8084"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-catalog:3306/service_catalog_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
-      - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=service-catalog-service2
-    depends_on:
-      - mysql-catalog
-      - service-discovery
-    restart: unless-stopped
-
-  clinic-management-service1:
+  clinic-management-service:
     build: ./clinic-management-service
-    ports:
-      - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-clinic:3306/clinic_management_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/clinic_management_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=dentify
+      - SPRING_DATASOURCE_PASSWORD=Clinic123
       - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=clinic-management-service1
+      - EUREKA_INSTANCE_HOSTNAME=clinic-management-service
+      - MANAGEMENT_PORT=8079
+      - MANAGEMENT_SERVER_PORT=8079
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
     depends_on:
-      - mysql-clinic
       - service-discovery
     restart: unless-stopped
+    deploy:
+      replicas: 2
 
-  clinic-management-service2:
-    build: ./clinic-management-service
-    ports:
-      - "8085:8085"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-clinic:3306/clinic_management_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
-      - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=clinic-management-service2
-    depends_on:
-      - mysql-clinic
-      - service-discovery
-    restart: unless-stopped
-
-  appointment-service1:
+  appointment-service:
     build: ./appointment-service
-    ports:
-      - "8086:8086"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-appointment:3306/appointment_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/appointment_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=dentify
+      - SPRING_DATASOURCE_PASSWORD=Clinic123
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USER=guest
       - RABBITMQ_PASS=guest
       - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=appointment-service1
+      - EUREKA_INSTANCE_HOSTNAME=appointment-service
+      - MANAGEMENT_PORT=8079
+      - MANAGEMENT_SERVER_PORT=8079
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
     depends_on:
-      - mysql-appointment
       - rabbitmq
       - service-discovery
     restart: unless-stopped
+    deploy:
+      replicas: 2
 
-  appointment-service2:
-    build: ./appointment-service
-    ports:
-      - "8086:8086"
+  autoscaler-gateway:
+    build: ./autoscaler
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-appointment:3306/appointment_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root123
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_USER=guest
-      - RABBITMQ_PASS=guest
-      - EUREKA_URL=http://service-discovery:8761/eureka/
-      - EUREKA_INSTANCE_HOSTNAME=appointment-service2
+      - SERVICE=api-gateway
+      - MIN_REPLICAS=1
+      - MAX_REPLICAS=4
+      - MANAGEMENT_PORT=8079
+      - CPU_UP_THRESHOLD=70
+      - CPU_DOWN_THRESHOLD=30
+      - COOLDOWN=120
+      - DRAIN_TIMEOUT=40
+      - CHECK_INTERVAL=15
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
-      - mysql-appointment
-      - rabbitmq
-      - service-discovery
-    restart: unless-stopped
+      - api-gateway
 
+  autoscaler-iam:
+    build: ./autoscaler
+    environment:
+      - SERVICE=iam-service
+      - MIN_REPLICAS=1
+      - MAX_REPLICAS=4
+      - MANAGEMENT_PORT=8079
+      - CPU_UP_THRESHOLD=70
+      - CPU_DOWN_THRESHOLD=30
+      - COOLDOWN=120
+      - DRAIN_TIMEOUT=40
+      - CHECK_INTERVAL=15
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - iam-service
+
+  autoscaler-patient:
+    build: ./autoscaler
+    environment:
+      - SERVICE=patient-attention-service
+      - MIN_REPLICAS=1
+      - MAX_REPLICAS=4
+      - MANAGEMENT_PORT=8079
+      - CPU_UP_THRESHOLD=70
+      - CPU_DOWN_THRESHOLD=30
+      - COOLDOWN=120
+      - DRAIN_TIMEOUT=40
+      - CHECK_INTERVAL=15
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - patient-attention-service
+
+  autoscaler-practice:
+    build: ./autoscaler
+    environment:
+      - SERVICE=practice-management-service
+      - MIN_REPLICAS=1
+      - MAX_REPLICAS=4
+      - MANAGEMENT_PORT=8079
+      - CPU_UP_THRESHOLD=70
+      - CPU_DOWN_THRESHOLD=30
+      - COOLDOWN=120
+      - DRAIN_TIMEOUT=40
+      - CHECK_INTERVAL=15
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - practice-management-service
+
+  autoscaler-service:
+    build: ./autoscaler
+    environment:
+      - SERVICE=service-catalog-service
+      - MIN_REPLICAS=1
+      - MAX_REPLICAS=4
+      - MANAGEMENT_PORT=8079
+      - CPU_UP_THRESHOLD=70
+      - CPU_DOWN_THRESHOLD=30
+      - COOLDOWN=120
+      - DRAIN_TIMEOUT=40
+      - CHECK_INTERVAL=15
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - service-catalog-service
+
+  autoscaler-clinic:
+    build: ./autoscaler
+    environment:
+      - SERVICE=clinic-management-service
+      - MIN_REPLICAS=1
+      - MAX_REPLICAS=4
+      - MANAGEMENT_PORT=8079
+      - CPU_UP_THRESHOLD=70
+      - CPU_DOWN_THRESHOLD=30
+      - COOLDOWN=120
+      - DRAIN_TIMEOUT=40
+      - CHECK_INTERVAL=15
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - clinic-management-service
+
+  autoscaler-appointment:
+    build: ./autoscaler
+    environment:
+      - SERVICE=appointment-service
+      - MIN_REPLICAS=1
+      - MAX_REPLICAS=4
+      - MANAGEMENT_PORT=8079
+      - CPU_UP_THRESHOLD=70
+      - CPU_DOWN_THRESHOLD=30
+      - COOLDOWN=120
+      - DRAIN_TIMEOUT=40
+      - CHECK_INTERVAL=15
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - appointment-service
 
 volumes:
   rabbitmq_data:
