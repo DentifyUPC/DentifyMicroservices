@@ -222,7 +222,7 @@ services:
       replicas: 2
 
   autoscaler-gateway:
-    build: ./autoscaler
+    build: ./updater
     environment:
       - SERVICE=api-gateway
       - MIN_REPLICAS=1
@@ -239,7 +239,7 @@ services:
       - api-gateway
 
   autoscaler-iam:
-    build: ./autoscaler
+    build: ./updater
     environment:
       - SERVICE=iam-service
       - MIN_REPLICAS=1
@@ -256,7 +256,7 @@ services:
       - iam-service
 
   autoscaler-patient:
-    build: ./autoscaler
+    build: ./updater
     environment:
       - SERVICE=patient-attention-service
       - MIN_REPLICAS=1
@@ -273,7 +273,7 @@ services:
       - patient-attention-service
 
   autoscaler-practice:
-    build: ./autoscaler
+    build: ./updater
     environment:
       - SERVICE=practice-management-service
       - MIN_REPLICAS=1
@@ -290,7 +290,7 @@ services:
       - practice-management-service
 
   autoscaler-service:
-    build: ./autoscaler
+    build: ./updater
     environment:
       - SERVICE=service-catalog-service
       - MIN_REPLICAS=1
@@ -307,7 +307,7 @@ services:
       - service-catalog-service
 
   autoscaler-clinic:
-    build: ./autoscaler
+    build: ./updater
     environment:
       - SERVICE=clinic-management-service
       - MIN_REPLICAS=1
@@ -324,7 +324,7 @@ services:
       - clinic-management-service
 
   autoscaler-appointment:
-    build: ./autoscaler
+    build: ./updater
     environment:
       - SERVICE=appointment-service
       - MIN_REPLICAS=1
