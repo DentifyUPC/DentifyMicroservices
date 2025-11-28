@@ -38,7 +38,8 @@ services:
     image: nginx:stable
     container_name: nginx
     volumes:
-      - ./nginx:/etc/nginx
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/mime.types:/etc/nginx/mime.types:ro
     depends_on:
       - service-discovery
 
@@ -55,6 +56,7 @@ services:
     volumes:
       - ./nginx:/etc/nginx                    # comparte el mismo volumen con nginx
       - ./nginx-template:/etc/nginx-template  # plantilla de entrada
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - service-discovery
 
@@ -96,7 +98,7 @@ services:
     build: ./iam-service
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/iam_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/iam_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=dentify
       - SPRING_DATASOURCE_PASSWORD=Clinic123
       - RABBITMQ_HOST=rabbitmq
@@ -120,7 +122,7 @@ services:
     build: ./patient-attention-service
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/patient_attention_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/patient_attention_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=dentify
       - SPRING_DATASOURCE_PASSWORD=Clinic123
       - RABBITMQ_HOST=rabbitmq
@@ -143,7 +145,7 @@ services:
     build: ./practice-management-service
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/practice_management_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/practice_management_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=dentify
       - SPRING_DATASOURCE_PASSWORD=Clinic123
       - RABBITMQ_HOST=rabbitmq
@@ -166,7 +168,7 @@ services:
     build: ./service-catalog-service
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/service_catalog_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/service_catalog_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=dentify
       - SPRING_DATASOURCE_PASSWORD=Clinic123
       - EUREKA_URL=http://service-discovery:8761/eureka/
@@ -184,7 +186,7 @@ services:
     build: ./clinic-management-service
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/clinic_management_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/clinic_management_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=dentify
       - SPRING_DATASOURCE_PASSWORD=Clinic123
       - EUREKA_URL=http://service-discovery:8761/eureka/
@@ -202,7 +204,7 @@ services:
     build: ./appointment-service
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/appointment_db?useSSL=true&requireSSL=true&sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/appointment_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=dentify
       - SPRING_DATASOURCE_PASSWORD=Clinic123
       - RABBITMQ_HOST=rabbitmq
