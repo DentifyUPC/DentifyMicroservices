@@ -1,17 +1,24 @@
 FROM python:3.11-slim
 
+# Instalamos dependencias del sistema necesarias para pip
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
+# Copiamos requirements.txt e instalamos dependencias Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY eureka-to-nginx.py .
+# Copiamos tu autoscaler
+COPY autoscaler.py .
 
-# No instalamos nginx
-# No montamos /etc/nginx-template
-# No montamos /etc/nginx
+# Damos permiso de ejecución
+RUN chmod +x autoscaler.py
 
-ENV EUREKA_URL=http://eureka:8761/eureka/apps
-ENV POLL_INTERVAL=15
+# Variables por defecto (pueden ser reemplazadas en docker-compose)
+ENV CHECK_INTERVAL=15 \
+    COOLDOWN=120
 
-CMD ["python", "/app/eureka-to-nginx.py"]
+CMD ["python", "/app/autoscaler.py"]
