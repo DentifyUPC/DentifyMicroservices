@@ -16,9 +16,6 @@ services:
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.eureka=true"
-      - "--providers.eureka.endpoint=http://service-discovery:8761/eureka"
-      - "--providers.eureka.refreshInterval=5s"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.le.acme.httpchallenge=true"
@@ -26,8 +23,6 @@ services:
       - "--certificatesresolvers.le.acme.email=tu-email@ejemplo.com"
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
       - "--api.dashboard=true"
-      - "--providers.eureka.servers=http://service-discovery:8761/eureka"
-      - "--providers.eureka.watch=true"
 
   rabbitmq:
     image: rabbitmq:3-management
