@@ -15,7 +15,7 @@ public class RabbitConfig {
     public static final String EXCHANGE_APPOINTMENT = "appointment.events";
     public static final String DLX = "appointment.events.dlx";
     public static final String APPOINTMENT_CREATED_ROUTING_KEY = "appointment.created";
-    public static final String APPOINTMENT_CREATED_QUEUE = "appointment.created";
+    public static final String APPOINTMENT_CREATED_QUEUE = "payment.appointment.created";
     public static final String APPOINTMENT_CREATED_DLQ = "appointment.created.dlq";
 
     @Bean

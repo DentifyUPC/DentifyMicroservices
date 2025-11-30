@@ -1,16 +1,14 @@
 package com.upc.dentify.appointmentservice.domain.events;
 
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AppointmentCreatedEvent {
-    private final Long id;
-    private final Long odontologistId;
-    private final Long patientId;
-
-    public AppointmentCreatedEvent(Long id, Long odontologistId, Long patientId) {
-        this.id = id;
-        this.odontologistId = odontologistId;
-        this.patientId = patientId;
-    }
+    private Long id;
+    private Long odontologistId;
+    private Long patientId;
 }
