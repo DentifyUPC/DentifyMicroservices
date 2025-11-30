@@ -18,5 +18,6 @@
         <module>service-catalog-service</module>
         <module>clinic-management-service</module>
         <module>appointment-service</module>
+        <module>payment-service</module>
     </modules>
 </project>
