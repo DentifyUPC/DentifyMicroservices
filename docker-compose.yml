@@ -4,32 +4,39 @@ services:
 
   traefik:
     image: traefik:v3.1
-    container_name: traefik
-    restart: always
+    networks:
+      - dentify-network
+    deploy:
+      restart_policy:
+        condition: on-failure
     ports:
       - "80:80"     # HTTP required for HTTP-01 challenge
       - "443:443"   # HTTPS
-      - "8078:8078"
+      - "8078:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-acme:/letsencrypt
     command:
-      - "--providers.docker=true"
+      - "--providers.swarm=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.le.acme.httpchallenge=true"
       - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.le.acme.email=tu-email@ejemplo.com"
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
       - "--api.dashboard=true"
+      - "--api.insecure=true"
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    networks:
+      - dentify-network
+    expose:
+      - "5672"
+      - "15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
@@ -38,8 +45,9 @@ services:
 
   # Service discovery (Eureka)
   service-discovery:
-    build: ./service-discovery
-    container_name: service-discovery
+    image: tonohc23/service-discovery
+    networks:
+      - dentify-network
     ports:
       - "8761:8761"
     environment:
@@ -47,34 +55,66 @@ services:
       - EUREKA_INSTANCE_HOSTNAME=service-discovery
       - MANAGEMENT_PORT=8079
       - MANAGEMENT_SERVER_PORT=8079
-      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
-    restart: unless-stopped
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
+    deploy:
+      restart_policy:
+        condition: on-failure
 
   # API Gateway
   api-gateway:
-    build: ./api-gateway
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.gateway.rule=Host(`dentify-microservices.canadacentral.cloudapp.azure.com`)"
-      - "traefik.http.routers.gateway.entrypoints=websecure"
-      - "traefik.http.routers.gateway.tls=true"
-      - "traefik.http.routers.gateway.tls.certresolver=le"
+    image: tonohc23/api-gateway
+    networks:
+      - dentify-network
+    expose:
+      - "8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - EUREKA_URL=http://service-discovery:8761/eureka/
       - EUREKA_INSTANCE_HOSTNAME=api-gateway
       - MANAGEMENT_PORT=8079
       - MANAGEMENT_SERVER_PORT=8079
-      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
+      # Configuración de Eureka
+      - EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS=10
+      - EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS=30
+      - EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS=10
+      - EUREKA_CLIENT_INITIAL_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS=10
     depends_on:
       - service-discovery
-    restart: unless-stopped
+    healthcheck:  # CRÍTICO: Health check de Docker Swarm
+      test: ["CMD", "curl", "-f", "http://localhost:8079/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.api-gateway.rule=Host(`dentify-microservices.canadacentral.cloudapp.azure.com`)"
+        - "traefik.http.routers.api-gateway.service=api-gateway"
+        - "traefik.http.routers.api-gateway.entrypoints=web,websecure"
+        - "traefik.http.services.api-gateway.loadbalancer.server.port=8080"
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+        - "traefik.http.routers.api-gateway.tls.certresolver=le"
+        - "traefik.http.routers.api-gateway-http.middlewares=redirect-to-https"
+        - "traefik.http.routers.api-gateway-http.rule=Host(`dentify-microservices.canadacentral.cloudapp.azure.com`)"
+        - "traefik.http.routers.api-gateway-http.entrypoints=web"
+        # Health checks de Traefik (para balanceo externo)
+        - "traefik.http.services.api-gateway.loadbalancer.healthcheck.path=/actuator/health"
+        - "traefik.http.services.api-gateway.loadbalancer.healthcheck.port=8079"
+        - "traefik.http.services.api-gateway.loadbalancer.healthcheck.interval=10s"
+        - "traefik.http.services.api-gateway.loadbalancer.healthcheck.timeout=3s"
       replicas: 2
 
   # IAM service
   iam-service:
-    build: ./iam-service
+    image: tonohc23/iam-service
+    networks:
+      - dentify-network
+    expose:
+      - "8081"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/iam_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -88,17 +128,33 @@ services:
       - EUREKA_INSTANCE_HOSTNAME=iam-service
       - MANAGEMENT_PORT=8079
       - MANAGEMENT_SERVER_PORT=8079
-      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
+      # Configuración de Eureka
+      - EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS=10
+      - EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS=30
+      - EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS=10
+      - EUREKA_CLIENT_INITIAL_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS=10
     depends_on:
       - rabbitmq
       - service-discovery
-    restart: unless-stopped
+    healthcheck:  # CRÍTICO: Health check de Docker Swarm
+      test: ["CMD", "curl", "-f", "http://localhost:8079/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     deploy:
+      restart_policy:
+        condition: on-failure
       replicas: 2
 
   # Patient attention
   patient-attention-service:
-    build: ./patient-attention-service
+    image: tonohc23/patient-attention-service
+    networks:
+      - dentify-network
+    expose:
+      - "8082"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/patient_attention_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -112,16 +168,32 @@ services:
       - EUREKA_INSTANCE_HOSTNAME=patient-attention-service
       - MANAGEMENT_PORT=8079
       - MANAGEMENT_SERVER_PORT=8079
-      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
+      # Configuración de Eureka
+      - EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS=10
+      - EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS=30
+      - EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS=10
+      - EUREKA_CLIENT_INITIAL_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS=10
     depends_on:
       - rabbitmq
       - service-discovery
-    restart: unless-stopped
+    healthcheck:  # CRÍTICO: Health check de Docker Swarm
+      test: ["CMD", "curl", "-f", "http://localhost:8079/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     deploy:
+      restart_policy:
+        condition: on-failure
       replicas: 2
 
   practice-management-service:
-    build: ./practice-management-service
+    image: tonohc23/practice-management-service
+    networks:
+      - dentify-network
+    expose:
+      - "8083"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/practice_management_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -135,16 +207,32 @@ services:
       - EUREKA_INSTANCE_HOSTNAME=practice-management-service
       - MANAGEMENT_PORT=8079
       - MANAGEMENT_SERVER_PORT=8079
-      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
+      # Configuración de Eureka
+      - EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS=10
+      - EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS=30
+      - EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS=10
+      - EUREKA_CLIENT_INITIAL_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS=10
     depends_on:
       - rabbitmq
       - service-discovery
-    restart: unless-stopped
+    healthcheck:  # CRÍTICO: Health check de Docker Swarm
+      test: ["CMD", "curl", "-f", "http://localhost:8079/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     deploy:
+      restart_policy:
+        condition: on-failure
       replicas: 2
 
   service-catalog-service:
-    build: ./service-catalog-service
+    image: tonohc23/service-catalog-service
+    networks:
+      - dentify-network
+    expose:
+      - "8084"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/service_catalog_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -154,15 +242,31 @@ services:
       - EUREKA_INSTANCE_HOSTNAME=service-catalog-service
       - MANAGEMENT_PORT=8079
       - MANAGEMENT_SERVER_PORT=8079
-      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
+      # Configuración de Eureka
+      - EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS=10
+      - EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS=30
+      - EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS=10
+      - EUREKA_CLIENT_INITIAL_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS=10
     depends_on:
       - service-discovery
-    restart: unless-stopped
+    healthcheck:  # CRÍTICO: Health check de Docker Swarm
+      test: ["CMD", "curl", "-f", "http://localhost:8079/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     deploy:
+      restart_policy:
+        condition: on-failure
       replicas: 2
 
   clinic-management-service:
-    build: ./clinic-management-service
+    image: tonohc23/clinic-management-service
+    networks:
+      - dentify-network
+    expose:
+      - "8085"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/clinic_management_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -172,15 +276,31 @@ services:
       - EUREKA_INSTANCE_HOSTNAME=clinic-management-service
       - MANAGEMENT_PORT=8079
       - MANAGEMENT_SERVER_PORT=8079
-      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
+      # Configuración de Eureka
+      - EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS=10
+      - EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS=30
+      - EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS=10
+      - EUREKA_CLIENT_INITIAL_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS=10
     depends_on:
       - service-discovery
-    restart: unless-stopped
+    healthcheck:  # CRÍTICO: Health check de Docker Swarm
+      test: ["CMD", "curl", "-f", "http://localhost:8079/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     deploy:
+      restart_policy:
+        condition: on-failure
       replicas: 2
 
   appointment-service:
-    build: ./appointment-service
+    image: tonohc23/appointment-service
+    networks:
+      - dentify-network
+    expose:
+      - "8086"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:mysql://dentifydbserver.mysql.database.azure.com:3306/appointment_db?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -194,16 +314,30 @@ services:
       - EUREKA_INSTANCE_HOSTNAME=appointment-service
       - MANAGEMENT_PORT=8079
       - MANAGEMENT_SERVER_PORT=8079
-      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,drain
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
+      # Configuración de Eureka
+      - EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS=10
+      - EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS=30
+      - EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS=10
+      - EUREKA_CLIENT_INITIAL_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS=10
     depends_on:
       - rabbitmq
       - service-discovery
-    restart: unless-stopped
+    healthcheck:  # CRÍTICO: Health check de Docker Swarm
+      test: ["CMD", "curl", "-f", "http://localhost:8079/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     deploy:
+      restart_policy:
+        condition: on-failure
       replicas: 2
 
   autoscaler-gateway:
-    build: ./updater
+    image: tonohc23/updater
+    networks:
+      - dentify-network
     environment:
       - SERVICE=api-gateway
       - MIN_REPLICAS=1
@@ -220,7 +354,9 @@ services:
       - api-gateway
 
   autoscaler-iam:
-    build: ./updater
+    image: tonohc23/updater
+    networks:
+      - dentify-network
     environment:
       - SERVICE=iam-service
       - MIN_REPLICAS=1
@@ -237,7 +373,9 @@ services:
       - iam-service
 
   autoscaler-patient:
-    build: ./updater
+    image: tonohc23/updater
+    networks:
+      - dentify-network
     environment:
       - SERVICE=patient-attention-service
       - MIN_REPLICAS=1
@@ -254,7 +392,9 @@ services:
       - patient-attention-service
 
   autoscaler-practice:
-    build: ./updater
+    image: tonohc23/updater
+    networks:
+      - dentify-network
     environment:
       - SERVICE=practice-management-service
       - MIN_REPLICAS=1
@@ -271,7 +411,9 @@ services:
       - practice-management-service
 
   autoscaler-service:
-    build: ./updater
+    image: tonohc23/updater
+    networks:
+      - dentify-network
     environment:
       - SERVICE=service-catalog-service
       - MIN_REPLICAS=1
@@ -288,7 +430,9 @@ services:
       - service-catalog-service
 
   autoscaler-clinic:
-    build: ./updater
+    image: tonohc23/updater
+    networks:
+      - dentify-network
     environment:
       - SERVICE=clinic-management-service
       - MIN_REPLICAS=1
@@ -305,7 +449,9 @@ services:
       - clinic-management-service
 
   autoscaler-appointment:
-    build: ./updater
+    image: tonohc23/updater
+    networks:
+      - dentify-network
     environment:
       - SERVICE=appointment-service
       - MIN_REPLICAS=1
@@ -324,3 +470,7 @@ services:
 volumes:
   rabbitmq_data:
   traefik-acme:
+
+networks:
+  dentify-network:
+    external: true

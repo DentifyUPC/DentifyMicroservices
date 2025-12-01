@@ -1,7 +1,10 @@
-# Dockerfile (simple)
 FROM eclipse-temurin:21-jre
+RUN apt-get update && \
+    apt-get install -y curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 ARG JAR_FILE=appointment-service-0.0.1-SNAPSHOT.jar
 COPY ${JAR_FILE} /app.jar
-EXPOSE 8086
-EXPOSE 8079
+EXPOSE 8086 8079
 ENTRYPOINT ["java","-jar","/app.jar"]
