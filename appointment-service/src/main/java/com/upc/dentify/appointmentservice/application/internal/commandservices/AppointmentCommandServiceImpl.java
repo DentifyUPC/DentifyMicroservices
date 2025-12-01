@@ -115,12 +115,15 @@ public class AppointmentCommandServiceImpl implements AppointmentCommandService 
         }
 
         Appointment appointment = new Appointment(command);
+        appointment.setServiceId(command.serviceId());
         appointmentRepository.save(appointment);
 
         AppointmentCreatedEvent payload = new AppointmentCreatedEvent(
                 appointment.getId(),
                 appointment.getOdontologistId(),
-                appointment.getPatientId()
+                appointment.getPatientId(),
+                command.clinicId(),
+                command.serviceId()
         );
         eventPublisher.publishEvent(new AppointmentCreatedDomainEvent(payload));
 

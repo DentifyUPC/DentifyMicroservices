@@ -21,4 +21,10 @@ public class ServicePerClinicAclController {
         boolean exists = servicePerClinicContextFacade.existsByClinicIdAndServiceId(clinicId, serviceId);
         return ResponseEntity.ok(exists);
     }
+
+    @GetMapping("/clinic/{clinicId}/service/{serviceId}/price")
+    public ResponseEntity<Double> getTotalServicePrice(@PathVariable Long clinicId, @PathVariable Long serviceId) {
+        Double price = servicePerClinicContextFacade.getTotalServicePrice(clinicId, serviceId);
+        return ResponseEntity.ok(price);
+    }
 }

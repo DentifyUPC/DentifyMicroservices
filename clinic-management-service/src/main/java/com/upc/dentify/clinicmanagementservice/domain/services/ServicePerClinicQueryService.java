@@ -9,4 +9,5 @@ import java.util.List;
 public interface ServicePerClinicQueryService {
     boolean existsByClinicIdAndServiceId(Long clinicId, Long serviceId);
     List<ServiceFormatResource> handle(GetAllServicesPerClinicsQuery query);
+    Double getTotalServicePrice(Long clinicId, Long serviceId);
 }

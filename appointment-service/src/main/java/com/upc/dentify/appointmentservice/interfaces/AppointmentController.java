@@ -51,6 +51,8 @@ public class AppointmentController {
     })
     public ResponseEntity<?> createAppointment(@RequestBody CreateAppointmentResource resource) {
         try {
+            System.out.println("DEBUG - Received resource: " + resource);
+            System.out.println("DEBUG - serviceId value: " + resource.serviceId());
             CreateAppointmentCommand command = CreateAppointmentCommandFromResourceAssembler.fromResourceToCommand(resource);
 
             var appointment = appointmentCommandService.handle(command);

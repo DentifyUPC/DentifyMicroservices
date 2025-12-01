@@ -246,6 +246,40 @@ services:
       - service-discovery
     restart: unless-stopped
 
+  mysql-payment:
+    image: mysql:8.0
+    container_name: mysql-payment
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: payment_db
+    ports:
+      - "3313:3306"
+    volumes:
+      - mysql_payment_data:/var/lib/mysql
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    ports:
+      - "8087:8087"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-payment:3306/payment_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=mysql
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
+      - EUREKA_URL=http://service-discovery:8761/eureka/
+      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
+      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
+    depends_on:
+      - mysql-payment
+      - rabbitmq
+      - service-discovery
+    restart: unless-stopped
+
 
 volumes:
   rabbitmq_data:
@@ -255,4 +289,5 @@ volumes:
   mysql_catalog_data:
   mysql_clinic_data:
   mysql_appointment_data:
+  mysql_payment_data:
   traefik-acme:

@@ -48,6 +48,9 @@ public class Appointment extends AuditableAbstractAggregateRoot<Appointment> {
     @Column(name = "clinic_id", nullable = false)
     private Long clinicId;
 
+    @Column(name = "service_id", nullable = false)
+    private Long serviceId;
+
     public Appointment() {}
 
     public Appointment(CreateAppointmentCommand command) {
@@ -59,5 +62,6 @@ public class Appointment extends AuditableAbstractAggregateRoot<Appointment> {
         this.appointmentDate = command.appointmentDate();
         this.shiftName = command.shiftName();
         this.clinicId = command.clinicId();
+        this.serviceId = command.serviceId();
     }
 }

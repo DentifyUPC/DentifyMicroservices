@@ -2,4 +2,5 @@ package com.upc.dentify.clinicmanagementservice.interfaces.acl;
 
 public interface ServicePerClinicContextFacade {
     boolean existsByClinicIdAndServiceId(Long clinicId, Long serviceId);
+    Double getTotalServicePrice(Long clinicId, Long serviceId);
 }

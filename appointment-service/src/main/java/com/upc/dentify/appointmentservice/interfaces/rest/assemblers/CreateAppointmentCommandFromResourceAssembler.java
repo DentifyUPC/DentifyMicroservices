@@ -12,7 +12,8 @@ public class CreateAppointmentCommandFromResourceAssembler {
                 resource.endTime(),
                 resource.appointmentDate(),
                 resource.shiftName(),
-                resource.clinicId()
+                resource.clinicId(),
+                resource.serviceId()
         );
     }
 }
