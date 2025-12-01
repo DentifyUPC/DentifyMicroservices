@@ -6,16 +6,16 @@ import java.time.LocalTime;
 public record CreateAppointmentCommand(
         Long patientId, Long odontologistId,
         LocalTime startTime, LocalTime endTime, LocalDate appointmentDate,
-        String shiftName, Long clinicId
+        String shiftName, Long clinicId, Long  serviceId
 ) {
     public CreateAppointmentCommand {
         if (patientId == null || patientId <= 0L) {
             throw new IllegalArgumentException("patientId must be greater than 0");
         }
 
-        if (odontologistId == null || odontologistId <= 0L) {
-            throw new IllegalArgumentException("odontologistId must be greater than 0");
-        }
+            if (odontologistId == null || odontologistId <= 0L) {
+                throw new IllegalArgumentException("odontologistId must be greater than 0");
+            }
 
         if (startTime == null) {
             throw new IllegalArgumentException("startTime must not be null");
@@ -35,6 +35,10 @@ public record CreateAppointmentCommand(
 
         if (clinicId == null || clinicId <= 0L) {
             throw new IllegalArgumentException("clinicId must be greater than 0");
+        }
+
+        if (serviceId == null || serviceId <= 0L) {
+            throw new IllegalArgumentException("serviceId must be greater than 0");
         }
     }
 }

@@ -11,4 +11,6 @@ public class AppointmentCreatedEvent {
     private Long id;                   // appointmentId
     private Long odontologistId;
     private Long patientId;
+    private Long clinicId;
+    private Long serviceId;
 }
