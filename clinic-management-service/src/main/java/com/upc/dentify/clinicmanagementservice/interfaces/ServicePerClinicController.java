@@ -82,7 +82,7 @@ public class ServicePerClinicController {
         return ResponseEntity.ok(serviceResource);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PATIENT')")
     @GetMapping("/{clinicId}")
     @Operation(summary = "Get all services by clinic ID", description = "Get all services by clinic ID")
     @ApiResponses(value = {

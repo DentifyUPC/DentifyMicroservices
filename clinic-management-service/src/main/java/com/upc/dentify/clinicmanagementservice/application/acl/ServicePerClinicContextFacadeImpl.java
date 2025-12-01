@@ -16,4 +16,9 @@ public class ServicePerClinicContextFacadeImpl implements ServicePerClinicContex
     public boolean existsByClinicIdAndServiceId(Long clinicId, Long serviceId) {
         return servicePerClinicQueryService.existsByClinicIdAndServiceId(clinicId, serviceId);
     }
+
+    @Override
+    public Double getTotalServicePrice(Long clinicId, Long serviceId) {
+        return servicePerClinicQueryService.getTotalServicePrice(clinicId, serviceId);
+    }
 }

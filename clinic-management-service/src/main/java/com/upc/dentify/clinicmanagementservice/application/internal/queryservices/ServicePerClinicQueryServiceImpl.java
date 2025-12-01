@@ -54,4 +54,12 @@ public class ServicePerClinicQueryServiceImpl implements ServicePerClinicQuerySe
                         ))
                 ).toList();
     }
+
+    @Override
+    public Double getTotalServicePrice(Long clinicId, Long serviceId) {
+        return servicePerClinicRepository
+                .findByClinicIdAndServiceId(clinicId, serviceId)
+                .map(ServicesPerClinics::getTotalServicePrice)
+                .orElse(0.0);
+    }
 }
