@@ -1,8 +1,11 @@
 package com.upc.dentify.patientattentionservice.domain.model.valueobjects;
 
+import com.upc.dentify.patientattentionservice.infrastructure.persistence.crypto.SecureStringConverter;
+import jakarta.persistence.Convert;
+
 import java.util.regex.Pattern;
 
-public record PhoneNumber(String phoneNumber) {
+public record PhoneNumber(@Convert(converter = SecureStringConverter.class)String phoneNumber) {
 
     private static final Pattern PHONE_PATTERN =
             Pattern.compile("^[0-9]{9,15}$"); // solo números, 9-15 dígitos
